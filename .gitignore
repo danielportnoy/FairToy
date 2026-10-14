@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Generated local data
+*.db
+*.sqlite
+*.sqlite3
+data/generated/
+
+# macOS and editor files
+.DS_Store
+.cursor/
+.idea/
+.vscode/
