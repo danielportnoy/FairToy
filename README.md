@@ -41,9 +41,9 @@ production deployment are intentionally deferred.
 ## Source data
 
 The assignment data is currently available at
-`../toy_data/` in the preparation workspace. Before implementation, the
-original six CSV files will be copied into this repository under
-`data/source/` so a fresh checkout can be seeded reproducibly. macOS metadata
-under `__MACOSX/` is not part of the application data.
+`../toy_data/` in the preparation workspace. The original six CSV files are
+copied into this repository under `data/` so a fresh checkout can be seeded
+reproducibly. macOS metadata under `__MACOSX/` is not part of the application
+data.
 
 Run instructions will be added when the backend and frontend are scaffolded.
