@@ -70,6 +70,24 @@ full conversation.
 - **Decision accepted:** use a small typed frontend API client over native
   `fetch` and keep server data authoritative.
 
+## 2026-10-15 — Foundation / Slice 1
+
+- **Phase:** Foundation
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add the `src/fairtoy` package, SQLAlchemy models, file-backed
+  SQLite setup, deterministic CSV importer, and setup/reset CLI commands.
+- **Importer behavior:** validate the complete six-file source set before
+  writing, preserve nulls, deduplicate exact rows, preserve distinct
+  relationships, reject invalid references, import atomically, and preserve
+  runtime Supplier flags on normal setup.
+- **Repository boundary:** the importer is operational setup tooling, not a
+  user-facing product workflow. API, impact analysis, and frontend work remain
+  deferred to later slices.
+- **Verification:** five automated tests passed; syntax, diff, and CLI reset
+  plus idempotent setup checks passed against the supplied fixtures.
+- **Review gate:** do not begin the next implementation slice until this
+  foundation is reviewed and accepted.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

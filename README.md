@@ -7,8 +7,9 @@ labor.
 
 ## Status
 
-The project is currently in the domain and system-design preparation phase.
-The implementation will follow the decisions in [`SPEC.md`](SPEC.md).
+Slice 1 foundation is implemented; the API and frontend remain deferred until
+the foundation is reviewed and accepted. The implementation follows the
+decisions in [`SPEC.md`](SPEC.md).
 
 ## Current scope
 
@@ -48,4 +49,37 @@ copied into this repository under `data/` so a fresh checkout can be seeded
 reproducibly. macOS metadata under `__MACOSX/` is not part of the application
 data.
 
-Run instructions will be added when the backend and frontend are scaffolded.
+Slice 1 local database setup is documented below. API and frontend run
+instructions will be added with their respective implementation slices.
+
+## Slice 1: local database setup
+
+The foundation slice uses Python, SQLAlchemy, and a file-backed SQLite
+database. The importer reads the six CSV fixtures from `data/` and writes
+the canonical tables described in `SYSTEM_DESIGN.md`.
+
+Create a virtual environment, install the project and development
+dependencies, then run the tests:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+pytest
+```
+
+Create or update the local database with the fixtures:
+
+```bash
+fairtoy setup
+```
+
+The default database is `data/generated/fairtoy.sqlite3`, which is ignored by
+git. Re-running `fairtoy setup` is idempotent and preserves current Supplier
+flags. To intentionally recreate the database from the fixtures:
+
+```bash
+fairtoy reset
+```
+
+The API and frontend are not implemented in this slice.
