@@ -297,6 +297,23 @@ full conversation.
 - **Explicit deferral:** browser component automation, advanced client-side
   caching, and unrelated frontend features remain out of scope.
 
+## 2026-10-15 — Frontend workflow coverage / Slice 12
+
+- **Phase:** Verification
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add a DOM-based dashboard test for the Finisher-to-Toy detail
+  workflow and Supplier flag mutation.
+- **Coverage:** verify API-backed loading, Toy selection, traceability detail
+  rendering, explicit Supplier flagging, and refetch-driven status updates.
+- **Behavior:** no UI, backend, or API contract changes.
+- **Verification:** frontend tests passed (`4 passed`), typecheck and
+  production build passed. The Python suite passed (`43 passed`), Ruff,
+  format, mypy, compilation, and diff checks passed. The environment still
+  reports 11 third-party Python 3.14 deprecation warnings.
+- **Explicit deferral:** full browser automation, visual regression testing,
+  advanced client-side caching, and unrelated frontend features remain out of
+  scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
