@@ -281,6 +281,22 @@ full conversation.
 - **Explicit deferral:** browser automation, advanced client-side caching, and
   unrelated screens remain out of scope.
 
+## 2026-10-15 — Frontend API boundary tests / Slice 11
+
+- **Phase:** Verification
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add a focused Vitest suite for the typed frontend API client.
+- **Coverage:** verify Finisher query encoding, explicit Supplier PATCH
+  payloads, response handling, and conversion of API error details to a typed
+  `ApiError`.
+- **Behavior:** no UI, backend, or API contract changes.
+- **Verification:** frontend tests passed (`3 passed`), typecheck and
+  production build passed. The Python suite passed (`43 passed`), Ruff,
+  format, mypy, compilation, and diff checks passed. The environment still
+  reports 11 third-party Python 3.14 deprecation warnings.
+- **Explicit deferral:** browser component automation, advanced client-side
+  caching, and unrelated frontend features remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

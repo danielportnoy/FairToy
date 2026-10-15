@@ -141,6 +141,7 @@ traceability detail, and contextual Supplier flag controls.
 Frontend checks:
 
 ```bash
+npm test
 npm run typecheck
 npm run build
 ```
