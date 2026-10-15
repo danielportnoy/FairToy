@@ -260,6 +260,27 @@ full conversation.
 - **Explicit deferral:** browser automation, deployment infrastructure, and
   unrelated feature work remain out of scope.
 
+## 2026-10-15 — Finisher dashboard / Slice 10
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add the focused React/TypeScript Finisher dashboard against the
+  existing API, including a typed native-fetch client, compact Toy summaries,
+  on-demand Toy detail paths, and contextual Supplier flag controls.
+- **UI behavior:** represent loading, empty, error, and mutation states; keep
+  server impact results authoritative; refetch summaries and detail after a
+  Supplier update.
+- **Boundary:** the Vite development server proxies `/api` to the local
+  FastAPI server. No new backend endpoints, authentication, generic CRUD, or
+  deployment infrastructure were added.
+- **Verification:** `npm install`, `npm run typecheck`, and `npm run build`
+  passed. The Python suite passed (`43 passed`), Ruff, format, mypy,
+  compilation, and diff checks passed. A local smoke check confirmed the
+  FastAPI endpoint, Vite app, and Vite `/api` proxy are reachable. The
+  environment still reports 11 third-party Python 3.14 deprecation warnings.
+- **Explicit deferral:** browser automation, advanced client-side caching, and
+  unrelated screens remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

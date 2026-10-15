@@ -122,4 +122,25 @@ The PATCH body is an explicit desired state:
 {"child_labor_flagged": true}
 ```
 
-The frontend remains a separate follow-up slice.
+## Frontend
+
+The frontend is a separate Vite + React + TypeScript app. Start the API first,
+then run:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open <http://127.0.0.1:5173>. The Vite development server proxies `/api`
+requests to the FastAPI server at `http://127.0.0.1:8000`. The frontend
+provides the Finisher selector, compact Toy impact list, full Toy
+traceability detail, and contextual Supplier flag controls.
+
+Frontend checks:
+
+```bash
+npm run typecheck
+npm run build
+```
