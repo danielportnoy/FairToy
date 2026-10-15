@@ -4,9 +4,16 @@ import type { Finisher, Supplier, SupplierDetail as SupplierDetailData } from ".
 import {
   filterSuppliers,
   formatDate,
+  paginate,
+  SUPPLIERS_PER_PAGE,
   type SupplierFilter,
 } from "../view-model";
-import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
+import {
+  EmptyNotice,
+  EntityIcon,
+  ErrorNotice,
+  Pagination,
+} from "./Shared";
 import { SupplierDetail } from "./SupplierDetail";
 
 interface SupplierWorkspaceProps {
@@ -45,9 +52,14 @@ export function SupplierWorkspace({
 }: SupplierWorkspaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState<SupplierFilter>("all");
+  const [page, setPage] = useState(1);
   const visibleSuppliers = useMemo(
     () => filterSuppliers(suppliers, searchQuery, filter),
     [filter, searchQuery, suppliers],
+  );
+  const supplierPage = useMemo(
+    () => paginate(visibleSuppliers, page, SUPPLIERS_PER_PAGE),
+    [page, visibleSuppliers],
   );
   const selectedSupplier = suppliers.find(
     (supplier) => supplier.supplier_id === selectedSupplierId,
@@ -81,7 +93,7 @@ export function SupplierWorkspace({
               Review all Suppliers and their global risk state.
               {selectedFinisher
                 ? ` Related-Toy counts below are for ${selectedFinisher.finisher_name}.`
-                : " Select a Finisher to see catalog relevance."}
+                : " Catalog relevance appears when a Finisher is selected in Traceability."}
             </p>
           </div>
         </div>
@@ -96,7 +108,10 @@ export function SupplierWorkspace({
             type="search"
             placeholder="Name or ID…"
             value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={(event) => {
+              setSearchQuery(event.target.value);
+              setPage(1);
+            }}
           />
         </label>
         <label className="search-label" htmlFor="supplier-filter">
@@ -104,9 +119,10 @@ export function SupplierWorkspace({
           <select
             id="supplier-filter"
             value={filter}
-            onChange={(event) =>
-              setFilter(event.target.value as SupplierFilter)
-            }
+            onChange={(event) => {
+              setFilter(event.target.value as SupplierFilter);
+              setPage(1);
+            }}
           >
             <option value="all">All Suppliers</option>
             <option value="flagged">Flagged</option>
@@ -129,11 +145,8 @@ export function SupplierWorkspace({
       )}
       {!loading && !error && visibleSuppliers.length > 0 && (
         <>
-          <p className="result-note">
-            Showing {visibleSuppliers.length} of {suppliers.length} Suppliers.
-          </p>
           <div className="supplier-list">
-            {visibleSuppliers.map((supplier) => (
+            {supplierPage.items.map((supplier) => (
               <SupplierRow
                 key={supplier.supplier_id}
                 supplier={supplier}
@@ -144,6 +157,15 @@ export function SupplierWorkspace({
               />
             ))}
           </div>
+          <Pagination
+            ariaLabel="Supplier pagination"
+            currentPage={supplierPage.page}
+            itemLabel="Suppliers"
+            onPageChange={setPage}
+            pageCount={supplierPage.pageCount}
+            pageSize={SUPPLIERS_PER_PAGE}
+            totalItems={supplierPage.total}
+          />
         </>
       )}
     </section>

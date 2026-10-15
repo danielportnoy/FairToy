@@ -98,3 +98,56 @@ export function SelectionRequired({
     </div>
   );
 }
+
+interface PaginationProps {
+  ariaLabel: string;
+  currentPage: number;
+  itemLabel: string;
+  onPageChange: (page: number) => void;
+  pageCount: number;
+  pageSize: number;
+  totalItems: number;
+}
+
+export function Pagination({
+  ariaLabel,
+  currentPage,
+  itemLabel,
+  onPageChange,
+  pageCount,
+  pageSize,
+  totalItems,
+}: PaginationProps) {
+  const firstItem =
+    totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const lastItem = Math.min(currentPage * pageSize, totalItems);
+
+  return (
+    <div className="pagination" aria-label={ariaLabel}>
+      <span className="pagination-summary">
+        Showing {firstItem}–{lastItem} of {totalItems} {itemLabel}
+      </span>
+      {pageCount > 1 && (
+        <div className="pagination-controls">
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => onPageChange(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {pageCount}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage === pageCount}
+            onClick={() => onPageChange(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

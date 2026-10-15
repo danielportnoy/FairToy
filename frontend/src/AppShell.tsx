@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 
 import type { Supplier } from "./api";
-import { FinisherSidebar } from "./components/FinisherSidebar";
-import { SelectionRequired, TraceMark } from "./components/Shared";
+import { AppNavigation } from "./components/AppNavigation";
+import { TraceMark } from "./components/Shared";
 import { SupplierWorkspace } from "./components/SupplierWorkspace";
 import { ToyInvestigation } from "./components/ToyInvestigation";
 import { ToysWorkspace } from "./components/ToysWorkspace";
@@ -107,29 +107,24 @@ function AppShell() {
           <p className="eyebrow">FAIRTOY / TRACEABILITY WORKSPACE</p>
           <h1>Trace every Toy clearly.</h1>
           <p className="intro">
-            Search the selected Finisher&apos;s catalog, filter current impact
-            status, and open a Toy investigation for the evidence path.
+            Trace catalog evidence for a selected Finisher and review global
+            Supplier risk in one focused workspace.
           </p>
         </div>
-        <div className="header-mark" aria-hidden="true">
-          <TraceMark />
+        <div className="header-actions">
+          <AppNavigation
+            activePage={activePage}
+            toyCount={fairToyData.toys.length}
+            supplierCount={fairToyData.suppliers.length}
+            onPageChange={handlePageChange}
+          />
+          <div className="header-mark" aria-hidden="true">
+            <TraceMark />
+          </div>
         </div>
       </header>
 
       <main className="dashboard">
-        <FinisherSidebar
-          finishers={fairToyData.finishers}
-          finishersLoading={fairToyData.finishersLoading}
-          finishersError={fairToyData.finishersError}
-          selectedFinisherId={selectedFinisherId}
-          selectedFinisher={selectedFinisher}
-          activePage={activePage}
-          toyCount={fairToyData.toys.length}
-          supplierCount={fairToyData.suppliers.length}
-          onFinisherChange={handleFinisherChange}
-          onPageChange={handlePageChange}
-        />
-
         <section className="content-panel panel" aria-live="polite">
           {activePage === "suppliers" && (
             <SupplierWorkspace
@@ -149,18 +144,12 @@ function AppShell() {
             />
           )}
 
-          {!selectedFinisherId && activePage === "traceability" && (
-            <SelectionRequired
-              loading={fairToyData.finishersLoading}
-              error={fairToyData.finishersError}
-            />
-          )}
-
-          {selectedFinisherId &&
-            activePage === "traceability" &&
-            !selectedToyId && (
+          {activePage === "traceability" && !selectedToyId && (
             <ToysWorkspace
-              finisherId={selectedFinisherId}
+              finishers={fairToyData.finishers}
+              finishersLoading={fairToyData.finishersLoading}
+              finishersError={fairToyData.finishersError}
+              selectedFinisherId={selectedFinisherId}
               toys={fairToyData.toys}
               relatedSuppliers={fairToyData.suppliers.filter(
                 (supplier) => (supplier.related_toy_count ?? 0) > 0,
@@ -169,6 +158,7 @@ function AppShell() {
               loading={fairToyData.toysLoading}
               error={fairToyData.toysError}
               selectedToyId={selectedToyId}
+              onFinisherChange={handleFinisherChange}
               onSelectToy={openInvestigation}
               onSelectSupplier={openSupplierDetail}
             />

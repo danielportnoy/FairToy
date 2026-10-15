@@ -3,10 +3,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from fairtoy.cli import main
+from fairtoy.config import DEFAULT_DATA_DIR, ImportSettings
 from fairtoy.db import create_engine_for_path, create_session_factory
 from fairtoy.models import Supplier
 
 FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
+
+
+def test_default_import_settings_use_full_fixture_set() -> None:
+    assert ImportSettings().data_dir == DEFAULT_DATA_DIR
+    assert DEFAULT_DATA_DIR == FIXTURE_DIR
 
 
 def _run_setup(database_path: Path) -> None:

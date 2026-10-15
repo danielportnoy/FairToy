@@ -107,6 +107,12 @@ const supplierDetail = {
   ],
 };
 
+const supplierInventory = Array.from({ length: 12 }, (_, index) => ({
+  ...supplier(false),
+  supplier_id: `SUP-${index + 1}`,
+  supplier_name: `Supplier ${index + 1}`,
+}));
+
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status: 200,
@@ -143,7 +149,10 @@ describe("FairToy dashboard", () => {
     render(<App />);
 
     expect(
-      screen.getByRole("heading", { name: "Choose a Finisher" }),
+      screen.getByRole("heading", { name: "Finisher Traceability" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("navigation", { name: "Primary pages" }),
     ).toBeTruthy();
     fireEvent.change(await screen.findByLabelText("Finisher"), {
       target: { value: "FIN-1" },
@@ -160,7 +169,7 @@ describe("FairToy dashboard", () => {
     expect(
       screen.queryByRole("option", { name: "Needs attention" }),
     ).toBeNull();
-    expect(screen.getByText("Showing 1–10 of 12")).toBeTruthy();
+    expect(screen.getByText("Showing 1–10 of 12 Toys")).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Status"), {
       target: { value: "affected" },
@@ -173,7 +182,7 @@ describe("FairToy dashboard", () => {
       target: { value: "all" },
     });
     expect(await screen.findByRole("button", { name: /Copper Camp/ })).toBeTruthy();
-    expect(screen.getByText("Showing 1–10 of 12")).toBeTruthy();
+    expect(screen.getByText("Showing 1–10 of 12 Toys")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Page 2 of 2")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Inventory Camp 9/ })).toBeTruthy();
@@ -182,7 +191,7 @@ describe("FairToy dashboard", () => {
       target: { value: "Copper" },
     });
     expect(await screen.findByRole("button", { name: /Copper Camp/ })).toBeTruthy();
-    expect(screen.getByText("Showing 1–1 of 1")).toBeTruthy();
+    expect(screen.getByText("Showing 1–1 of 1 Toys")).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/suppliers?finisher_id=FIN-1",
       expect.objectContaining({ headers: expect.any(Headers) }),
@@ -212,6 +221,7 @@ describe("FairToy dashboard", () => {
     expect(
       await screen.findByRole("heading", { name: "Suppliers" }),
     ).toBeTruthy();
+    expect(screen.queryByLabelText("Finisher")).toBeNull();
     expect(
       screen.queryByRole("heading", { name: "Choose a Finisher to begin." }),
     ).toBeNull();
@@ -228,6 +238,83 @@ describe("FairToy dashboard", () => {
       expect.stringContaining("flag Supplier One globally"),
     );
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("paginates the Related Suppliers context list", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const path = String(input);
+      if (path === "/api/finishers") {
+        return jsonResponse([finisher]);
+      }
+      if (path === "/api/toys?finisher_id=FIN-1") {
+        return jsonResponse([attentionToy]);
+      }
+      if (
+        path === "/api/suppliers" ||
+        path === "/api/suppliers?finisher_id=FIN-1"
+      ) {
+        return jsonResponse(supplierInventory);
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    render(<App />);
+    fireEvent.change(await screen.findByLabelText("Finisher"), {
+      target: { value: "FIN-1" },
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: "Related Suppliers" }),
+    ).toBeTruthy();
+    fireEvent.click(
+      screen.getByRole("heading", { name: "Related Suppliers" }),
+    );
+    expect(
+      screen.getByText("Showing 1–10 of 12 Suppliers"),
+    ).toBeTruthy();
+    expect(screen.queryByText("Supplier 11", { exact: true })).toBeNull();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Next" }),
+    );
+    expect(screen.getByText("Page 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Supplier 11", { exact: true })).toBeTruthy();
+  });
+
+  it("paginates the filtered global Supplier list", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const path = String(input);
+      if (path === "/api/finishers") {
+        return jsonResponse([finisher]);
+      }
+      if (path === "/api/suppliers") {
+        return jsonResponse(supplierInventory);
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    render(<App />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: /^Suppliers/ }),
+    );
+
+    expect(
+      await screen.findByText("Showing 1–10 of 12 Suppliers"),
+    ).toBeTruthy();
+    expect(screen.queryByText("Supplier 11", { exact: true })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Page 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Supplier 11", { exact: true })).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Search Suppliers"), {
+      target: { value: "Supplier 12" },
+    });
+    expect(
+      await screen.findByText("Showing 1–1 of 1 Suppliers"),
+    ).toBeTruthy();
+    expect(screen.getByText("Supplier 12", { exact: true })).toBeTruthy();
+    expect(screen.queryByText("Page 2 of 2")).toBeNull();
   });
 
   it("opens read-only Supplier detail from the global Supplier page", async () => {
@@ -358,5 +445,50 @@ describe("FairToy dashboard", () => {
     ).toBeTruthy();
     expect(patchBody).toEqual({ child_labor_flagged: true });
     expect(screen.getByText("Flagged for child labor")).toBeTruthy();
+  });
+
+  it("paginates Parts inside Toy Investigation", async () => {
+    const manyParts = Array.from({ length: 12 }, (_, index) => ({
+      ...detail(false).parts[0],
+      part_id: `PRT-${index + 1}`,
+      part_name: `Part ${index + 1}`,
+    }));
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const path = String(input);
+      if (path === "/api/finishers") {
+        return jsonResponse([finisher]);
+      }
+      if (path === "/api/toys?finisher_id=FIN-1") {
+        return jsonResponse([attentionToy]);
+      }
+      if (
+        path === "/api/suppliers" ||
+        path === "/api/suppliers?finisher_id=FIN-1"
+      ) {
+        return jsonResponse([supplier(false)]);
+      }
+      if (path === "/api/toys/TOY-2?finisher_id=FIN-1") {
+        return jsonResponse({ ...detail(false), parts: manyParts });
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+
+    render(<App />);
+    fireEvent.change(await screen.findByLabelText("Finisher"), {
+      target: { value: "FIN-1" },
+    });
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Affected Camp/ }),
+    );
+
+    expect(
+      await screen.findByText("Showing 1–10 of 12 Parts"),
+    ).toBeTruthy();
+    expect(screen.queryByText("Part 11", { exact: true })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Page 2 of 2")).toBeTruthy();
+    expect(screen.getByText("Part 11", { exact: true })).toBeTruthy();
   });
 });

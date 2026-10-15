@@ -9,6 +9,8 @@ export type ToyStatusFilter = "all" | ImpactStatus;
 export type SupplierFilter = "all" | "flagged" | "unflagged";
 
 export const TOYS_PER_PAGE = 10;
+export const SUPPLIERS_PER_PAGE = 10;
+export const PARTS_PER_PAGE = 10;
 
 const STATUS_LABELS: Record<ImpactStatus, string> = {
   unaffected: "Unaffected",

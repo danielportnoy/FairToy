@@ -47,9 +47,10 @@ production deployment are intentionally deferred.
 ## Source data
 
 The repository contains two reproducible fixture sets under `data/`:
-`data/demo/` is the small default dataset for local UI work, and
-`data/full/` preserves the original assignment export for broader integration
-coverage. macOS metadata under `__MACOSX/` is not part of either dataset.
+`data/full/` preserves the original assignment export and is the default
+dataset for the local application. `data/demo/` is a small fixture for focused
+UI work and tests. macOS metadata under `__MACOSX/` is not part of either
+dataset.
 
 Local database setup and API run instructions are documented below. The
 frontend is a separate Vite application and uses the API's workflow-oriented
@@ -74,7 +75,7 @@ ruff format --check src tests
 mypy src/fairtoy
 ```
 
-Create or update the local database with the small demo fixtures:
+Create or update the local database with the full assignment fixtures:
 
 ```bash
 fairtoy setup
@@ -82,23 +83,25 @@ fairtoy setup
 
 The default database is `data/generated/fairtoy.sqlite3`, which is ignored by
 git. Re-running `fairtoy setup` is idempotent and preserves current Supplier
-flags. To intentionally recreate the demo database:
+flags. To intentionally recreate the full database:
 
 ```bash
 fairtoy reset
 ```
 
-To load the original full assignment dataset into a separate database:
+To use the small demo fixture in the same local database:
 
 ```bash
 fairtoy reset \
-  --data-dir data/full \
-  --database data/generated/fairtoy-full.sqlite3
+  --data-dir data/demo
 ```
 
-Both commands validate the complete fixture set before writing. A failed
+Both commands use `data/generated/fairtoy.sqlite3` unless `--database` is
+provided. They validate the complete fixture set before writing. A failed
 validation does not replace an existing database; `reset` is destructive only
-after the fixture data has passed validation.
+after the fixture data has passed validation. Do not load both fixture sets
+into one database with `setup`: they share identifiers and the importer does
+not provide dataset isolation.
 
 ## API
 

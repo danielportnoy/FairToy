@@ -5,7 +5,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = PROJECT_ROOT / "data"
-DEFAULT_DATA_DIR = DATA_ROOT / "demo"
+DEFAULT_DATA_DIR = DATA_ROOT / "full"
 DEFAULT_DATABASE_PATH = DATA_ROOT / "generated" / "fairtoy.sqlite3"
 
 

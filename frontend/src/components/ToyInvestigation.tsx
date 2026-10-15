@@ -1,10 +1,14 @@
+import { useEffect, useMemo, useState } from "react";
+
 import type { ImpactPath, ToyDetail } from "../api";
 import {
   formatCost,
+  paginate,
+  PARTS_PER_PAGE,
   statusClass,
   statusLabel,
 } from "../view-model";
-import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
+import { EmptyNotice, EntityIcon, ErrorNotice, Pagination } from "./Shared";
 
 interface ToyInvestigationProps {
   detail: ToyDetail | null;
@@ -83,6 +87,16 @@ function ToyDetailContent({
   updatingSupplierId,
   onSupplierFlag,
 }: ToyDetailContentProps) {
+  const [page, setPage] = useState(1);
+  const partPage = useMemo(
+    () => paginate(detail.parts, page, PARTS_PER_PAGE),
+    [detail.parts, page],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [detail.toy_id]);
+
   return (
     <div className="detail-content">
       <div className="detail-title">
@@ -100,46 +114,55 @@ function ToyDetailContent({
       {detail.parts.length === 0 ? (
         <EmptyNotice message="This Toy has no required Parts." />
       ) : (
-        <div className="part-list">
-          {detail.parts.map((part) => (
-            <details className="part-card" key={part.part_id}>
-              <summary className="part-summary">
-                <div className="part-identity">
-                  <EntityIcon type="part" />
-                  <div>
-                    <span className="detail-id">{part.part_id}</span>
-                    <h4>{part.part_name}</h4>
+        <>
+          <div className="part-list">
+            {partPage.items.map((part) => (
+              <details className="part-card" key={part.part_id}>
+                <summary className="part-summary">
+                  <div className="part-identity">
+                    <EntityIcon type="part" />
+                    <div>
+                      <span className="detail-id">{part.part_id}</span>
+                      <h4>{part.part_name}</h4>
+                    </div>
                   </div>
-                </div>
-                <div className="part-meta">
-                  <span className="quantity">Qty {part.quantity}</span>
-                  <span className={statusClass(part.status)}>
-                    {statusLabel(part.status)}
-                  </span>
-                </div>
-              </summary>
-              <div className="part-detail">
-                <p className="part-reason">
-                  {part.reason}
-                </p>
-                {part.paths.length === 0 ? (
-                  <EmptyNotice message="No known possible sources." compact />
-                ) : (
-                  <div className="path-list">
-                    {part.paths.map((path) => (
-                      <PathCard
-                        key={`${path.supplier_id}-${path.factory_id}`}
-                        path={path}
-                        updating={updatingSupplierId === path.supplier_id}
-                        onSupplierFlag={onSupplierFlag}
-                      />
-                    ))}
+                  <div className="part-meta">
+                    <span className="quantity">Qty {part.quantity}</span>
+                    <span className={statusClass(part.status)}>
+                      {statusLabel(part.status)}
+                    </span>
                   </div>
-                )}
-              </div>
-            </details>
-          ))}
-        </div>
+                </summary>
+                <div className="part-detail">
+                  <p className="part-reason">{part.reason}</p>
+                  {part.paths.length === 0 ? (
+                    <EmptyNotice message="No known possible sources." compact />
+                  ) : (
+                    <div className="path-list">
+                      {part.paths.map((path) => (
+                        <PathCard
+                          key={`${path.supplier_id}-${path.factory_id}`}
+                          path={path}
+                          updating={updatingSupplierId === path.supplier_id}
+                          onSupplierFlag={onSupplierFlag}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+          <Pagination
+            ariaLabel="Part pagination"
+            currentPage={partPage.page}
+            itemLabel="Parts"
+            onPageChange={setPage}
+            pageCount={partPage.pageCount}
+            pageSize={PARTS_PER_PAGE}
+            totalItems={partPage.total}
+          />
+        </>
       )}
     </div>
   );

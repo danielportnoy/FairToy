@@ -70,10 +70,13 @@ SQLite is the source of truth for the local application and stores canonical
 entities plus the mutable current Supplier flag.
 
 A dedicated setup/import command will create the schema and load the selected
-fixture directory, defaulting to `data/demo/`. Normal application startup
-will reuse the existing database and will not reseed it, so runtime Supplier
-flags survive restarts. A separate development reset operation may
-intentionally recreate the database from either fixture set.
+fixture directory, defaulting to `data/full/` in the single local database
+`data/generated/fairtoy.sqlite3`. Normal application startup will reuse the
+existing database and will not reseed it, so runtime Supplier flags survive
+restarts. A separate development reset operation may intentionally replace
+that database with either fixture set. The small `data/demo/` fixture is not
+loaded alongside `data/full/`: the two sets share identifiers and the
+canonical schema has no dataset-isolation dimension.
 
 Generated database files do not belong in version control. A migration system
 is deferred for this disposable take-home database.

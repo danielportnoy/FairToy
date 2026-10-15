@@ -12,9 +12,9 @@ full conversation.
   marked rather than treated as current requirements.
 - The current workflow is two top-level pages: Finisher Traceability and
   Suppliers. Toy and Supplier details are drill-downs within those pages.
-- `data/demo/` is the default small fixture set; `data/full/` preserves the
-  original assignment export.
-- The latest verified Python suite has 47 passing tests; frontend checks are
+- `data/full/` is the default fixture set for the single local SQLite
+  database; `data/demo/` remains available for focused UI work and tests.
+- The latest verified Python suite has 52 passing tests; frontend checks are
   recorded in the implementation entries below.
 
 The dated entries that follow are historical checkpoints, not an additional
@@ -616,6 +616,147 @@ source of requirements.
 - **Verification:** backend tests (`50 passed`), frontend tests (`14
   passed`), mypy, Ruff check/format, TypeScript typecheck, production build,
   Python compilation, and `git diff --check` passed.
+
+## 2026-10-16 — Move catalog selection into Traceability
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** move the two-page navigation into the application header and
+  move Finisher selection into the main Finisher Traceability workspace.
+  Suppliers no longer render a catalog selector because that workspace is
+  global.
+- **State behavior:** preserve the selected Finisher while switching between
+  workspaces, clear Toy/Supplier drill-down state when changing pages, and
+  continue requiring an explicit selection before loading Toys.
+- **Compatibility:** no API, schema, impact-rule, or domain changes. The app
+  remains one SPA route with two client-side top-level page states.
+- **Verification:** frontend tests (`14 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Use one default local database
+
+- **Phase:** Foundation / developer experience
+- **Status:** Implemented and verified
+- **Decision:** default `fairtoy setup` and `fairtoy reset` to the full
+  assignment fixtures in `data/full/`, writing to
+  `data/generated/fairtoy.sqlite3`.
+- **Scope:** keep the demo fixture for explicit tests or UI experiments, but
+  do not load demo and full fixtures into the same database because they share
+  identifiers and the schema has no dataset-isolation dimension.
+- **Operational effect:** switching fixtures is an explicit reset of the same
+  SQLite file; the running API should be restarted after a reset.
+- **Verification:** default `fairtoy reset` imported 8 Finishers, 50
+  Suppliers, 232 Factories, 300 Toys, and 10,463 Toy-Part relationships;
+  the live API returned all 8 Finishers. The Python suite passed (`51
+  passed`), Ruff and mypy passed, and `git diff --check` passed.
+
+## 2026-10-16 — Paginate Supplier workspaces
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** add ten-row client-side pagination to the global Suppliers list
+  and the Related Suppliers context list on Finisher Traceability.
+- **Behavior:** Supplier search and risk filtering run before pagination and
+  reset the global list to page one. Related Suppliers reset to page one when
+  the selected Finisher changes. Both lists use the same shared pagination
+  presentation and retain their existing click-through and flag actions.
+- **Compatibility:** no API, backend, domain, or Supplier detail-list
+  changes. Factories and supplied Parts remain compact read-only detail
+  lists.
+- **Verification:** frontend tests (`16 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Collapse Related Supplier context
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** combine the Finisher selector and Related Suppliers into one
+  Catalog Context card. Related Suppliers now uses a native accessible
+  disclosure and is collapsed by default.
+- **Behavior:** retain the Related Supplier count, ten-row pagination, and
+  Supplier click-through inside the expanded disclosure. The global
+  Suppliers workspace remains unchanged.
+- **Compatibility:** no API, backend, domain, or impact-rule changes.
+- **Verification:** frontend tests (`16 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Align frontend entity surfaces
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** normalize visual alignment for entity icons, navigation counts,
+  headings, row content, status badges, risk actions, pagination controls,
+  and traceability fact columns.
+- **Responsive behavior:** desktop rows use stable content/action columns;
+  mobile overrides stack those areas without changing interaction behavior.
+- **Compatibility:** no API, schema, domain, impact-rule, or workflow
+  changes.
+- **Verification:** frontend tests (`16 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Standardize counter alignment
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** give navigation and workspace counters fixed dimensions,
+  centered numerals, and consistent placement across headings, disclosures,
+  and detail sections.
+- **Compatibility:** no API, schema, domain, impact-rule, or workflow
+  changes.
+- **Verification:** frontend tests (`16 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Fix Related Supplier counter placement
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** align the Related Suppliers counter to the right side of its
+  disclosure header, immediately before the expand/collapse affordance.
+- **Compatibility:** no API, schema, domain, impact-rule, or workflow
+  changes.
+- **Verification:** frontend tests (`16 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Make demo Supplier coverage uneven
+
+- **Phase:** Foundation / developer experience
+- **Status:** Implemented and verified
+- **Scope:** keep the demo fixture small while making Supplier coverage
+  visibly different across Finishers: FIN-001 uses one Supplier, FIN-002 uses
+  two, and FIN-003 uses all three.
+- **Review scenario:** flagging SUP-001 for FIN-002 produces one affected,
+  one potentially affected, and one unaffected Toy, making the status filters
+  and traceability drill-down easy to exercise.
+- **Compatibility:** the full assignment fixture and canonical schema are
+  unchanged; only `data/demo/` and its fixture assertions changed.
+- **Verification:** the demo fixture tests and full backend suite passed (`52
+  passed`), Ruff and mypy passed, and `git diff --check` passed.
+
+## 2026-10-16 — Paginate Toy Investigation Parts
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** add ten-row client-side pagination to the Parts list inside Toy
+  Investigation.
+- **Behavior:** opening a different Toy resets to page one. Part expansion,
+  Supplier actions, and all Supplier/Factory source paths remain unchanged
+  within each Part.
+- **Compatibility:** no API, backend, domain, or detail-response changes.
+- **Verification:** frontend tests (`17 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
+
+## 2026-10-16 — Align Part row metadata
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** align Part quantity and status metadata to the right side of
+  each expandable Part row, immediately before the expand/collapse affordance.
+- **Responsive behavior:** retain stacked Part rows on narrow screens with
+  the expand affordance pinned to the row corner.
+- **Compatibility:** no API, schema, domain, impact-rule, or workflow
+  changes.
+- **Verification:** frontend tests (`17 passed`), TypeScript typecheck,
+  production build, and `git diff --check` passed.
 
 ## Working method
 

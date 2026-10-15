@@ -15,15 +15,19 @@ importer normalizes them according to the root [`SPEC.md`](../SPEC.md).
 
 ## Fixture sets
 
-- `demo/` is the default local dataset. It contains three Finishers, two Toys
-  per Finisher, three Suppliers, and deliberately different Supplier
-  coverage: `FIN-001` uses `SUP-001`/`SUP-002`, `FIN-002` uses
-  `SUP-002`/`SUP-003`, and `FIN-003` uses `SUP-001`/`SUP-003`.
-- `full/` preserves the original assignment dataset for broad integration
-  coverage and scale checks.
+- `full/` is the default local dataset and preserves the original assignment
+  export for broad integration coverage and scale checks.
+- `demo/` is a deliberately small fixture for focused UI work and tests. It
+  contains three Finishers, three Toys per Finisher, three Suppliers, and
+  deliberately uneven Supplier coverage: `FIN-001` uses only `SUP-001`,
+  `FIN-002` uses `SUP-001`/`SUP-002`, and `FIN-003` uses all three Suppliers.
+- The two- and three-Supplier Finishers' Toys are arranged so flagging one
+  Supplier produces one affected, one potentially affected, and one
+  unaffected Toy. For example, select `FIN-002`, flag `SUP-001`, and review
+  the three Toy statuses.
 - `generated/` contains local SQLite databases and is ignored by git.
 
-Use `fairtoy setup` or `fairtoy reset` for the small demo dataset. Pass
-`--data-dir data/full` when you want to load the original assignment data.
+Use `fairtoy setup` or `fairtoy reset` for the default full dataset. Pass
+`--data-dir data/demo` when you want to load the small demo fixture.
 
 The `__MACOSX/` entries from the original archive are intentionally excluded.

@@ -1,7 +1,10 @@
 toy_id,toy_name,finisher_id,retail_price_usd,units_per_year
 TOY-0021,Marble Rally Car,FIN-001,24.99,12000
 TOY-0022,Meadow Wagon,FIN-001,18.50,8500
+TOY-0023,Cedar Explorer,FIN-001,27.00,7200
 TOY-0031,Coral Digger,FIN-002,29.99,6400
 TOY-0032,Echo Doll,FIN-002,21.50,9100
+TOY-0033,Harbor Sound Box,FIN-002,26.00,5800
 TOY-0041,Copper Camp,FIN-003,39.50,4200
 TOY-0042,Frost Playhouse,FIN-003,50.40,2800
+TOY-0043,Northstar Trail Set,FIN-003,31.00,5100
