@@ -314,6 +314,32 @@ full conversation.
   advanced client-side caching, and unrelated frontend features remain out of
   scope.
 
+## 2026-10-15 — Product UX refinement / MVP scope reset
+
+- **Phase:** Product design
+- **Status:** Accepted; ready for implementation handoff
+- **Human decisions:**
+  - make Needs Attention the default Finisher view;
+  - provide a separate searchable Inventory view for the complete Toy
+    catalog;
+  - open a dedicated Toy Investigation view from either risk or inventory
+    results;
+  - require explicit Finisher selection because authentication is out of
+    scope;
+  - use progressive disclosure for Parts and source paths;
+  - confirm global Supplier flag/unflag actions before mutation;
+  - keep the existing API and domain contract for this MVP.
+- **Scope reset:** do not add a new overview endpoint, exposure projection,
+  lazy-loaded path API, pagination/virtualization, a new data-quality status,
+  an i18n library, or administration/CRUD screens in this slice.
+- **Scale boundary:** the current response and dataset are acceptable for the
+  take-home. If fan-out, payload size, or latency grows materially, future
+  work should introduce server-side Part/source filtering or pagination,
+  monitoring, and an incremental impact projection.
+- **Documentation outcome:** update `SPEC.md`, `DECISIONS.md`,
+  `SYSTEM_DESIGN.md`, and `README.md` so the implementation handoff and
+  final repository describe the same workflow.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

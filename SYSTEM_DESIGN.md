@@ -232,10 +232,27 @@ reason codes alongside human-readable reasons. Serialize monetary values
 consistently, with decimal strings acceptable when preserving currency
 precision.
 
-React presents one focused Finisher dashboard with a Finisher selector,
-impact summary, filterable Toy list, selected-Toy detail, and contextual
-Supplier flag controls. It must represent loading, empty, error, and
-mutation states. Full administration navigation is deferred.
+React presents one focused Finisher workflow across three views:
+
+- **Needs Attention:** the default view for the selected Finisher, with
+  compact risk counts and a prioritized queue of affected and potentially
+  affected Toys;
+- **Inventory:** the complete Toy catalog with search, status filtering, and
+  links to investigation;
+- **Toy Investigation:** the selected Toy's Parts and possible source paths,
+  with contextual Supplier flag actions.
+
+The first visit requires explicit Finisher selection because authentication
+and user accounts are out of scope. The selected Finisher remains visible
+across views. The UI uses progressive disclosure: summaries and risk signals
+come first, while Parts and source paths are opened on demand.
+
+The current MVP reuses the existing compact summary and on-demand detail
+endpoints. It may derive simple status counts from the loaded summary list;
+it does not add a separate overview endpoint, exposure projection, or
+server-side path pagination for the take-home. It must still represent
+loading, empty, error, and mutation states. Full administration navigation is
+deferred.
 
 Frontend API calls will be centralized behind a small typed client using the
 browser's native `fetch`. After a Supplier mutation, the dashboard will
@@ -267,24 +284,30 @@ end-to-end workflow. A full browser automation suite is deferred.
 - A future materialized impact projection may be introduced if high-fanout
   reads become a bottleneck.
 
-## Open system-design questions
+## Remaining system-design questions
 
 1. What foreign keys, check constraints, and nullability rules should the
    accepted canonical tables use?
 2. What repository queries provide the facts needed by impact analysis?
 3. What API contract supports the dashboard, traceability detail, and
    idempotent Supplier flagging?
-4. What frontend route and component structure best demonstrate the core
-   workflow?
-5. What tests verify importer integrity, impact classification, and the
+4. What tests verify importer integrity, impact classification, and the
    end-to-end flag flow?
-6. What indexes and future projection boundary would address scale?
+
+The frontend information architecture is resolved by D036; exact route
+mechanics remain an implementation detail. The MVP scale boundary is resolved
+by D038; a future projection or server-side pagination strategy should be
+introduced only when observed fan-out, payload size, or latency justifies it.
 
 ## Deferred production extensions
 
 - event-driven recalculation and a materialized impact read model;
+- server-side pagination or lazy loading for high-fanout Parts and source
+  paths;
 - factory-level risk observations;
 - risk history, evidence, actors, and approvals;
 - source allocation per Finisher or production batch;
 - authentication, tenant isolation, and permissions;
-- full CRUD and operational workflows.
+- full CRUD and operational workflows;
+- data-quality states for incomplete traceability;
+- annual-unit exposure metrics and locale-specific explanation catalogs.

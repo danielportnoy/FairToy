@@ -7,9 +7,10 @@ labor.
 
 ## Status
 
-The foundation, impact-analysis service, repository boundary, and API are
-implemented. The frontend remains deferred to a later slice. The
-implementation follows the decisions in
+The foundation, impact-analysis service, repository boundary, API, and initial
+frontend slice are implemented. The frontend workflow is being refined around
+Needs Attention, Inventory, and Toy Investigation views. The implementation
+follows the decisions in
 [`SPEC.md`](SPEC.md).
 
 ## Current scope
@@ -51,7 +52,8 @@ reproducibly. macOS metadata under `__MACOSX/` is not part of the application
 data.
 
 Local database setup and API run instructions are documented below. The
-frontend remains deferred.
+frontend is a separate Vite application and uses the API's workflow-oriented
+endpoints.
 
 ## Local database setup
 
@@ -135,8 +137,11 @@ npm run dev
 
 Open <http://127.0.0.1:5173>. The Vite development server proxies `/api`
 requests to the FastAPI server at `http://127.0.0.1:8000`. The frontend
-provides the Finisher selector, compact Toy impact list, full Toy
-traceability detail, and contextual Supplier flag controls.
+currently provides a Finisher selector, compact Toy impact list, Toy
+traceability detail, and contextual Supplier flag controls. The agreed
+workflow refinement is a risk-focused Needs Attention view, a complete Toy
+Inventory view, and explicit Finisher context. Authentication,
+administration, and generic CRUD remain out of scope.
 
 Frontend checks:
 

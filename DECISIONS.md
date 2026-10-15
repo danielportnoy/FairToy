@@ -268,14 +268,14 @@ not a transcript of the planning conversation.
 - **Trade-off:** The frontend performs an additional read when a Toy is
   opened, but avoids over-fetching and N+1-style relationship loading.
 
-## D026 — Use one focused Finisher dashboard
+## D026 — Use one focused Finisher workflow
 
-- **Status:** Accepted
-- **Decision:** The frontend will center on a Finisher selector, impact
-  summary, filterable Toy list, selected-Toy detail, and contextual Supplier
-  flag controls.
-- **Rationale:** A single workflow-focused screen demonstrates the required
-  behavior without adding unrelated administration navigation.
+- **Status:** Superseded by D036
+- **Decision:** Keep the frontend focused on one Finisher traceability
+  workflow. The original single-dashboard presentation is superseded by a
+  small set of focused views rather than unrelated administration navigation.
+- **Rationale:** The required behavior remains one coherent workflow even
+  when the information is split across views for readability.
 - **Trade-off:** Full CRUD navigation and separate operational workflows are
   deferred.
 
@@ -395,3 +395,93 @@ not a transcript of the planning conversation.
 - **Trade-off:** The detail representation is richer than a minimal resource
   response, but it directly satisfies the traceability requirement. Summary
   reads must not include the full path graph.
+
+## D036 — Use progressive-disclosure Finisher views
+
+- **Status:** Accepted
+- **Decision:** Organize the MVP into three focused views:
+  - **Needs Attention:** the default Finisher view, showing affected and
+    potentially affected Toys in a compact action queue;
+  - **Inventory:** the complete Toy catalog in a searchable, filterable table;
+  - **Toy Investigation:** the selected Toy's Parts and possible
+    Part-to-Factory-to-Supplier paths, with contextual Supplier actions.
+  The UI must not render the entire relationship graph as one equally weighted
+  page.
+- **Rationale:** A list of many Toys is useful for search and completeness,
+  but it is not an effective first experience when every row competes for
+  attention. Progressive disclosure lets the Finisher see risk first and open
+  traceability evidence on demand.
+- **Trade-off:** The workflow has more navigation states than the original
+  dashboard, but remains within the existing summary/detail API boundary.
+  A purpose-built overview endpoint is not required for this MVP.
+
+## D037 — Require explicit Finisher context without authentication
+
+- **Status:** Accepted
+- **Decision:** Because authentication and user accounts are out of scope,
+  the first visit requires an explicit Finisher selection. The application
+  must not silently choose the first fixture record. The selected
+  `finisher_id` remains visible and is preserved across the workflow, with
+  URL or local-storage persistence left as a frontend implementation detail.
+- **Rationale:** Multiple Finishers exist in the fixture data, and silently
+  showing one company's exposure would make the product context ambiguous.
+- **Trade-off:** The first visit has one additional selection step, but it
+  makes the demo state explicit and prevents accidental cross-Finisher
+  interpretation.
+
+## D038 — Keep the MVP scale boundary explicit
+
+- **Status:** Accepted
+- **Decision:** For the take-home, use the existing compact Toy summary and
+  on-demand Toy detail reads, plus UI-level filtering and progressive
+  disclosure. Do not add an overview projection, lazy-loaded path endpoints,
+  server-side pagination, virtualization, or event-driven impact
+  recalculation now.
+- **Rationale:** The supplied fixture is moderate and the measured detail
+  response is approximately 16.5 KB. The assignment evaluates product and
+  modeling judgment within a one-to-three-hour target, not production
+  infrastructure.
+- **Future:** If detail fan-out, payload size, or latency grows materially,
+  add server-side Part/source filtering or pagination, query-plan monitoring,
+  and an incremental materialized impact projection. Move the operational
+  database to PostgreSQL when SQLite's concurrency limits become relevant.
+
+## D039 — Keep explanation codes language-neutral
+
+- **Status:** Accepted
+- **Decision:** Treat `reason_code` as the stable machine-readable
+  explanation contract. The API may continue returning an English `reason`
+  for the current MVP, while a future frontend locale catalog can translate
+  the code. Do not add a full internationalization library to this slice.
+- **Rationale:** Domain and API data should not need to change when user-facing
+  language changes. The current response already carries both the stable code
+  and a human-readable fallback.
+- **Trade-off:** Only the English presentation is implemented now; locale
+  catalogs remain a future UI concern.
+
+## D040 — Confirm global Supplier risk mutations
+
+- **Status:** Accepted
+- **Decision:** The Toy Investigation view must confirm a Supplier flag or
+  unflag action before sending the explicit PATCH. The confirmation explains
+  that the Supplier state is global and may change other Toys' calculated
+  statuses. After success, the UI refetches the authoritative summaries and
+  detail.
+- **Rationale:** A small path-level button can otherwise hide the fan-out of a
+  global risk-state mutation.
+- **Trade-off:** The action takes one additional interaction, but the impact
+  is deliberate and understandable.
+
+## D041 — Defer speculative exposure and data-quality states
+
+- **Status:** Accepted
+- **Decision:** Keep the current three impact states and current response
+  contract for the MVP. Do not add a new `needs_review` status or annual-unit
+  and retail-value exposure metrics until their product semantics and API
+  support justify them. If exposure metrics are added later, annual units
+  should be considered before retail price as a risk measure.
+- **Rationale:** Missing source evidence and commercial values require
+  additional product definitions. Adding them now would expand the domain
+  contract while the core traceability workflow is still being polished.
+- **Future:** Distinguish missing evidence from unaffected status and expose
+  physical exposure metrics when the data and workflow support them.

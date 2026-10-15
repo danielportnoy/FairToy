@@ -143,6 +143,16 @@ the customer's upstream systems.
 
 - Supplier flags are global in the current bounded context.
 - A Finisher's view is filtered to its own catalog relationships.
+- Because authentication is out of scope, the first visit requires an explicit
+  Finisher selection; the UI must not silently choose an arbitrary Finisher.
+- The default Finisher view is a risk-focused Needs Attention queue containing
+  affected and potentially affected Toys. A separate Inventory view provides
+  the complete Toy catalog with search and filters.
+- Selecting a Toy opens an investigation view with its Parts and possible
+  source paths. The UI uses progressive disclosure so the full relationship
+  graph is available without presenting every path at once.
+- Flagging a Supplier is a deliberate, confirmed action because the current
+  Supplier state is global and can change other Toys' calculated results.
 - A new or removed Supplier flag changes the next calculated impact view.
 - There is no real-time push notification; users see the current state when
   they load or refresh the view.
@@ -153,7 +163,13 @@ the customer's upstream systems.
 
 - A fresh setup can import the supplied data reproducibly.
 - A user can select a Finisher and browse its toys.
+- A first-time user can explicitly select the active Finisher before viewing
+  catalog data.
+- The user can open a risk-focused Needs Attention view, switch to the full
+  Inventory view, and open a Toy investigation from either view.
 - A user can inspect a toy's parts, possible sources, suppliers, and factories.
+- Supplier flagging is confirmed in the UI and the resulting global impact
+  changes are visible after the authoritative data is refreshed.
 - With no flags, relevant toys are unaffected.
 - A mixed flagged/unflagged source set produces potentially affected.
 - A fully flagged known source set produces affected.
@@ -169,9 +185,9 @@ the customer's upstream systems.
 - Import command and migration strategy.
 - API endpoints, HTTP methods, and response shapes.
 - Query shape, indexes, and repository boundaries.
-- Frontend route and component structure.
 - UI loading, empty, and error states.
 - Materialized impact projections or event-driven recalculation at scale.
+- Server-side pagination or lazy loading for high-fanout detail reads.
 - Factory-level risk observations and risk precedence.
 - Supplier risk history, evidence, actors, and approvals.
 - Optional CRUD capabilities after the core workflow is complete.
