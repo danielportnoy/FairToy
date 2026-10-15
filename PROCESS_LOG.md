@@ -227,6 +227,24 @@ full conversation.
 - **Explicit deferral:** schema changes, API behavior, and new importer
   capabilities remain out of scope.
 
+## 2026-10-15 — Setup transaction boundaries / Slice 8
+
+- **Phase:** Foundation maintainability
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** clarify CLI configuration and setup/reset error boundaries without
+  changing the canonical schema or importer semantics.
+- **Behavior:** validate the complete fixture set before an explicit reset can
+  drop an existing database; normal setup continues to preserve Supplier flags,
+  while a valid reset recreates the database and clears runtime state.
+- **Compatibility:** existing `fairtoy setup` and `fairtoy reset` commands,
+  path flags, and importer entry points remain available.
+- **Verification:** focused CLI/importer tests passed (`7 passed`); the full
+  suite passed (`38 passed`), with Ruff, format, mypy, compilation, and diff
+  checks also passing. The environment still reports 11 third-party Python
+  3.14 deprecation warnings.
+- **Explicit deferral:** migrations, deployment infrastructure, and unrelated
+  database abstractions remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

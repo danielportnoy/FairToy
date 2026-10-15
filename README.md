@@ -86,6 +86,10 @@ flags. To intentionally recreate the database from the fixtures:
 fairtoy reset
 ```
 
+Both commands validate the complete fixture set before writing. A failed
+validation does not replace an existing database; `reset` is destructive only
+after the fixture data has passed validation.
+
 ## API
 
 Start the API after setting up the local database:

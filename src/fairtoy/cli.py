@@ -6,27 +6,33 @@ from pathlib import Path
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from .config import DEFAULT_DATA_DIR, DEFAULT_DATABASE_PATH
+from .config import ImportSettings
 from .db import (
     create_engine_for_path,
     create_schema,
     create_session_factory,
     drop_schema,
 )
-from .importer import ImportSummary, ImportValidationError, import_fixtures
+from .importer import (
+    ImportSummary,
+    ImportValidationError,
+    import_source_data,
+    read_source_data,
+)
 
 
 def _add_location_arguments(parser: argparse.ArgumentParser) -> None:
+    defaults = ImportSettings()
     parser.add_argument(
         "--data-dir",
         type=Path,
-        default=DEFAULT_DATA_DIR,
+        default=defaults.data_dir,
         help="directory containing the six CSV fixture files",
     )
     parser.add_argument(
         "--database",
         type=Path,
-        default=DEFAULT_DATABASE_PATH,
+        default=defaults.database_path,
         help="SQLite database path",
     )
 
@@ -71,18 +77,18 @@ def _summary_text(summary: ImportSummary) -> str:
 
 def _run_import(
     *,
-    data_dir: Path,
-    database_path: Path,
+    settings: ImportSettings,
     reset: bool,
 ) -> ImportSummary:
-    engine = create_engine_for_path(database_path)
+    source_data = read_source_data(settings.data_dir)
+    engine = create_engine_for_path(settings.database_path)
     try:
         if reset:
             drop_schema(engine)
         create_schema(engine)
         session_factory = create_session_factory(engine)
         with session_factory() as session:
-            return import_fixtures(session, data_dir)
+            return import_source_data(session, source_data)
     finally:
         engine.dispose()
 
@@ -91,12 +97,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
     try:
-        summary = _run_import(
+        settings = ImportSettings.from_values(
             data_dir=args.data_dir,
             database_path=args.database,
+        )
+        summary = _run_import(
+            settings=settings,
             reset=args.command == "reset",
         )
-    except (ImportValidationError, SQLAlchemyError) as exc:
+    except (ImportValidationError, OSError, SQLAlchemyError) as exc:
         print(f"FairToy setup failed: {exc}", file=sys.stderr)
         return 1
 

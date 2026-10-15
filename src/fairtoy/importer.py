@@ -29,13 +29,22 @@ def read_source_data(data_dir: str | Path) -> SourceData:
     return validate_source_data(parse_source_data(data_dir))
 
 
+def import_source_data(
+    session: Session,
+    source_data: SourceData,
+) -> ImportSummary:
+    """Persist already-validated source data in one transaction."""
+
+    return persist_source_data(session, source_data)
+
+
 def import_fixtures(
     session: Session,
     data_dir: str | Path,
 ) -> ImportSummary:
     """Validate and atomically persist fixtures without resetting flags."""
 
-    return persist_source_data(session, read_source_data(data_dir))
+    return import_source_data(session, read_source_data(data_dir))
 
 
 __all__ = [
@@ -51,6 +60,7 @@ __all__ = [
     "SupplierRecord",
     "ToyPartRecord",
     "ToyRecord",
+    "import_source_data",
     "import_fixtures",
     "read_source_data",
 ]
