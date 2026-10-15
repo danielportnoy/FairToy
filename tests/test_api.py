@@ -60,6 +60,41 @@ def test_lists_suppliers_relevant_to_selected_finisher(
     assert all(supplier["related_toy_count"] > 0 for supplier in suppliers)
 
 
+def test_supplier_detail_contains_factories_and_supplied_parts(
+    client: TestClient,
+) -> None:
+    response = client.get("/api/suppliers/SUP-001")
+
+    assert response.status_code == 200
+    supplier = response.json()
+    assert supplier["supplier_id"] == "SUP-001"
+    assert supplier["supplier_name"]
+    assert supplier["related_toy_count"] is None
+    assert supplier["factories"]
+    assert supplier["supplied_parts"]
+    assert [factory["factory_id"] for factory in supplier["factories"]] == sorted(
+        factory["factory_id"] for factory in supplier["factories"]
+    )
+    assert [part["part_id"] for part in supplier["supplied_parts"]] == sorted(
+        part["part_id"] for part in supplier["supplied_parts"]
+    )
+    assert set(supplier["factories"][0]) == {
+        "factory_id",
+        "factory_name",
+        "address_line",
+        "city",
+        "country",
+    }
+    assert set(supplier["supplied_parts"][0]) == {"part_id", "part_name"}
+
+
+def test_unknown_supplier_detail_returns_not_found(client: TestClient) -> None:
+    response = client.get("/api/suppliers/SUP-UNKNOWN")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Supplier not found"
+
+
 def test_supplier_review_rejects_unknown_finisher(client: TestClient) -> None:
     response = client.get(
         "/api/suppliers",

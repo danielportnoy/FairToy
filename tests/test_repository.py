@@ -79,6 +79,24 @@ def test_lists_unique_finisher_suppliers_with_related_toy_counts(
     )
 
 
+def test_supplier_detail_lists_unique_factories_and_supplied_parts(
+    session_factory,
+) -> None:
+    with session_factory() as session:
+        detail = TraceabilityRepository(session).get_supplier_detail("SUP-001")
+
+    assert detail is not None
+    assert detail.supplier_id == "SUP-001"
+    assert detail.factories
+    assert detail.supplied_parts
+    assert [factory.factory_id for factory in detail.factories] == sorted(
+        factory.factory_id for factory in detail.factories
+    )
+    assert [part.part_id for part in detail.supplied_parts] == sorted(
+        part.part_id for part in detail.supplied_parts
+    )
+
+
 def test_detail_read_is_scoped_to_the_finisher_catalog(
     session_factory,
 ) -> None:

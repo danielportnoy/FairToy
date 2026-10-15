@@ -4,6 +4,7 @@ import {
   fairtoyApi,
   type Finisher,
   type Supplier,
+  type SupplierDetail,
   type ToyDetail,
   type ToySummary,
 } from "./api";
@@ -27,6 +28,9 @@ export interface FairToyData {
   suppliers: Supplier[];
   suppliersLoading: boolean;
   suppliersError: string | null;
+  supplierDetail: SupplierDetail | null;
+  supplierDetailLoading: boolean;
+  supplierDetailError: string | null;
   toyDetail: ToyDetail | null;
   detailLoading: boolean;
   detailError: string | null;
@@ -41,6 +45,7 @@ export interface FairToyData {
 export function useFairToyData(
   selectedFinisherId: string,
   selectedToyId: string,
+  selectedSupplierId: string,
 ): FairToyData {
   const [finishers, setFinishers] = useState<Finisher[]>([]);
   const [finishersLoading, setFinishersLoading] = useState(true);
@@ -53,6 +58,12 @@ export function useFairToyData(
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [suppliersLoading, setSuppliersLoading] = useState(false);
   const [suppliersError, setSuppliersError] = useState<string | null>(null);
+  const [supplierDetail, setSupplierDetail] =
+    useState<SupplierDetail | null>(null);
+  const [supplierDetailLoading, setSupplierDetailLoading] = useState(false);
+  const [supplierDetailError, setSupplierDetailError] = useState<string | null>(
+    null,
+  );
 
   const [toyDetail, setToyDetail] = useState<ToyDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -165,8 +176,43 @@ export function useFairToyData(
   }, [selectedFinisherId]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    setSupplierDetail(null);
+    setSupplierDetailError(null);
+
+    if (!selectedSupplierId) {
+      setSupplierDetailLoading(false);
+      return () => controller.abort();
+    }
+
+    async function loadSupplierDetail() {
+      setSupplierDetailLoading(true);
+      try {
+        const nextDetail = await fairtoyApi.getSupplier(
+          selectedSupplierId,
+          controller.signal,
+        );
+        if (!controller.signal.aborted) {
+          setSupplierDetail(nextDetail);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted && !isAbortError(error)) {
+          setSupplierDetailError(errorMessage(error));
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSupplierDetailLoading(false);
+        }
+      }
+    }
+
+    void loadSupplierDetail();
+    return () => controller.abort();
+  }, [selectedSupplierId]);
+
+  useEffect(() => {
     setMutationError(null);
-  }, [selectedFinisherId, selectedToyId]);
+  }, [selectedFinisherId, selectedSupplierId, selectedToyId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -215,6 +261,7 @@ export function useFairToyData(
           nextDetail,
           globalSuppliers,
           relevantSuppliers,
+          nextSupplierDetail,
         ] = await Promise.all([
           selectedFinisherId
             ? fairtoyApi.listToys(selectedFinisherId)
@@ -226,17 +273,21 @@ export function useFairToyData(
           selectedFinisherId
             ? fairtoyApi.listSuppliers(selectedFinisherId)
             : Promise.resolve<Supplier[] | null>(null),
+          selectedSupplierId
+            ? fairtoyApi.getSupplier(selectedSupplierId)
+            : Promise.resolve<SupplierDetail | null>(null),
         ]);
         setToys(nextToys);
         setToyDetail(nextDetail);
         setSuppliers(mergeSupplierRelevance(globalSuppliers, relevantSuppliers));
+        setSupplierDetail(nextSupplierDetail);
       } catch (error) {
         setMutationError(errorMessage(error));
       } finally {
         setUpdatingSupplierId(null);
       }
     },
-    [selectedFinisherId, selectedToyId],
+    [selectedFinisherId, selectedSupplierId, selectedToyId],
   );
 
   return {
@@ -249,6 +300,9 @@ export function useFairToyData(
     suppliers,
     suppliersLoading,
     suppliersError,
+    supplierDetail,
+    supplierDetailLoading,
+    supplierDetailError,
     toyDetail,
     detailLoading,
     detailError,

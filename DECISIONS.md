@@ -399,18 +399,19 @@ not a transcript of the planning conversation.
 ## D036 — Use a focused progressive-disclosure workflow
 
 - **Status:** Accepted
-- **Decision:** Use two top-level workspaces:
-  - **Toys:** one list with explicit impact-status filters, search, and
-    client-side pagination;
-  - **Suppliers:** a global risk registry with search, flag state, and
-    flag/unflag actions.
-  Toy Investigation is a drill-down from the Toys list. Parts and source
-  paths use progressive disclosure.
+- **Decision:** Use two top-level product pages:
+  - **Finisher Traceability:** an explicitly selected Finisher's Toys,
+    related Suppliers, and Toy → Part → Supplier → Factory investigation;
+  - **Suppliers:** a global Supplier registry with search, flag state,
+    flag/unflag actions, and read-only Supplier detail for factories and
+    supplied Parts.
+  Toy and Supplier details are drill-downs within their respective pages.
+  Parts and source paths use progressive disclosure.
 - **Rationale:** Toys, Suppliers, and traceability evidence are different
-  user tasks. One Toy list avoids duplicate tabs, while a separate Supplier
-  workspace makes the required global risk action discoverable.
-- **Trade-off:** The UI has two workspaces and one drill-down, but no generic
-  administration area or speculative dashboard infrastructure.
+  user tasks. A Finisher page keeps catalog context coherent, while a
+  separate Supplier page makes the required global risk action discoverable.
+- **Trade-off:** The UI has two focused pages, but no generic administration
+  area or speculative dashboard infrastructure.
 
 ## D037 — Require explicit Finisher context without authentication
 
@@ -517,11 +518,12 @@ not a transcript of the planning conversation.
 - **Status:** Accepted
 - **Decision:** Supplier Review is available without a selected Finisher and
   lists all Suppliers by default. It supports search, flagged/unflagged
-  filtering, and one explicit `Flag supplier`/`Unflag supplier` action per
-  Supplier. When a Finisher is selected, the UI may show or filter by
-  relevance to that catalog, but relevance is not required to flag a
-  Supplier. Use the unfiltered `GET /api/suppliers` collection as the primary
-  read; retain the optional `finisher_id` query for contextual relevance.
+  filtering, one explicit `Flag supplier`/`Unflag supplier` action per
+  Supplier, and read-only detail for the Supplier's Factories and supplied
+  Parts. When a Finisher is selected, the UI may show or filter by relevance
+  to that catalog, but relevance is not required to flag a Supplier. Use the
+  unfiltered `GET /api/suppliers` collection as the primary read; retain the
+  optional `finisher_id` query for contextual relevance.
 - **Rationale:** Supplier is the global risk subject. A Finisher may need to
   flag a Supplier before it is currently related to that Finisher's catalog,
   and hiding the action inside a Toy source path makes the core workflow hard

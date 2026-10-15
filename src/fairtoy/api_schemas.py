@@ -29,6 +29,24 @@ class SupplierResponse(BaseModel):
     related_toy_count: int | None = None
 
 
+class SupplierFactoryResponse(BaseModel):
+    factory_id: str
+    factory_name: str
+    address_line: str | None
+    city: str | None
+    country: str | None
+
+
+class SupplierPartResponse(BaseModel):
+    part_id: str
+    part_name: str
+
+
+class SupplierDetailResponse(SupplierResponse):
+    factories: list[SupplierFactoryResponse]
+    supplied_parts: list[SupplierPartResponse]
+
+
 class SupplierFlagUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

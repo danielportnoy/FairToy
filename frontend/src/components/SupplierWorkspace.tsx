@@ -1,20 +1,27 @@
 import { useMemo, useState } from "react";
 
-import type { Finisher, Supplier } from "../api";
+import type { Finisher, Supplier, SupplierDetail as SupplierDetailData } from "../api";
 import {
   filterSuppliers,
   formatDate,
   type SupplierFilter,
 } from "../view-model";
 import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
+import { SupplierDetail } from "./SupplierDetail";
 
 interface SupplierWorkspaceProps {
   suppliers: Supplier[];
   selectedFinisher: Finisher | undefined;
+  selectedSupplierId: string;
+  supplierDetail: SupplierDetailData | null;
+  supplierDetailLoading: boolean;
+  supplierDetailError: string | null;
   loading: boolean;
   error: string | null;
   mutationError: string | null;
   updatingSupplierId: string | null;
+  onSelectSupplier: (supplierId: string) => void;
+  onBack: () => void;
   onSupplierFlag: (
     supplier: Supplier,
     childLaborFlagged: boolean,
@@ -24,10 +31,16 @@ interface SupplierWorkspaceProps {
 export function SupplierWorkspace({
   suppliers,
   selectedFinisher,
+  selectedSupplierId,
+  supplierDetail,
+  supplierDetailLoading,
+  supplierDetailError,
   loading,
   error,
   mutationError,
   updatingSupplierId,
+  onSelectSupplier,
+  onBack,
   onSupplierFlag,
 }: SupplierWorkspaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,15 +49,34 @@ export function SupplierWorkspace({
     () => filterSuppliers(suppliers, searchQuery, filter),
     [filter, searchQuery, suppliers],
   );
+  const selectedSupplier = suppliers.find(
+    (supplier) => supplier.supplier_id === selectedSupplierId,
+  );
+
+  if (selectedSupplierId) {
+    return (
+      <SupplierDetail
+        detail={supplierDetail}
+        selectedFinisher={selectedFinisher}
+        relatedToyCount={selectedSupplier?.related_toy_count}
+        loading={supplierDetailLoading}
+        error={supplierDetailError}
+        mutationError={mutationError}
+        updating={updatingSupplierId === selectedSupplierId}
+        onBack={onBack}
+        onSupplierFlag={onSupplierFlag}
+      />
+    );
+  }
 
   return (
-    <section aria-labelledby="supplier-review-title">
+    <section aria-labelledby="suppliers-title">
       <div className="view-heading">
         <div className="heading-with-icon">
           <EntityIcon type="supplier" />
           <div>
-            <p className="eyebrow">SUPPLIER WORKSPACE</p>
-            <h2 id="supplier-review-title">Supplier Review</h2>
+            <p className="eyebrow">SUPPLIERS PAGE</p>
+            <h2 id="suppliers-title">Suppliers</h2>
             <p className="view-description">
               Review all Suppliers and their global risk state.
               {selectedFinisher
@@ -107,6 +139,7 @@ export function SupplierWorkspace({
                 supplier={supplier}
                 selectedFinisher={selectedFinisher}
                 updating={updatingSupplierId === supplier.supplier_id}
+                onSelectSupplier={onSelectSupplier}
                 onSupplierFlag={onSupplierFlag}
               />
             ))}
@@ -121,6 +154,7 @@ interface SupplierRowProps {
   supplier: Supplier;
   selectedFinisher: Finisher | undefined;
   updating: boolean;
+  onSelectSupplier: (supplierId: string) => void;
   onSupplierFlag: (
     supplier: Supplier,
     childLaborFlagged: boolean,
@@ -131,6 +165,7 @@ function SupplierRow({
   supplier,
   selectedFinisher,
   updating,
+  onSelectSupplier,
   onSupplierFlag,
 }: SupplierRowProps) {
   const relatedToyCount = supplier.related_toy_count ?? 0;
@@ -141,7 +176,11 @@ function SupplierRow({
 
   return (
     <article className="supplier-row">
-      <div className="supplier-identity">
+      <button
+        className="supplier-link"
+        type="button"
+        onClick={() => onSelectSupplier(supplier.supplier_id)}
+      >
         <EntityIcon type="supplier" />
         <div className="supplier-main">
           <span className="detail-id">{supplier.supplier_id}</span>
@@ -162,7 +201,7 @@ function SupplierRow({
               : " · not flagged"}
           </span>
         </div>
-      </div>
+      </button>
       <div className="supplier-action">
         <span
           className={`status ${

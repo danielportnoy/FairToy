@@ -215,6 +215,7 @@ supplied as a filter, conceptually:
 - `GET /api/toys/{toy_id}?finisher_id={finisher_id}`
 - `GET /api/suppliers`
 - `GET /api/suppliers?finisher_id={finisher_id}`
+- `GET /api/suppliers/{supplier_id}`
 - `PATCH /api/suppliers/{supplier_id}`
 
 The current Supplier risk state is updated with an explicit desired value,
@@ -229,6 +230,10 @@ through that Finisher's Toy/Part/source graph, with a related-Toy count where
 practical. The filtered form provides contextual relevance; it does not
 restrict the global Supplier flag mutation.
 
+Supplier detail is read-only and returns the Supplier, its Factories, and the
+Parts for which it is a possible source. Generic editing of those relationships
+is out of scope.
+
 List reads should return compact Toy impact summaries. A detail read for one
 Toy should return its complete parts, quantities, possible sources, Supplier
 flags, Factories, and explanation paths. The frontend loads detail only when a
@@ -242,26 +247,26 @@ reason codes alongside human-readable reasons. Serialize monetary values
 consistently, with decimal strings acceptable when preserving currency
 precision.
 
-React presents one focused Finisher workflow across two top-level workspaces:
+React presents two top-level pages:
 
-- **Toys:** one searchable catalog with an `All statuses` filter by default.
-  Individual impact-status filters can narrow the same list. The list
-  supports client-side pagination of ten rows per page;
-- **Suppliers:** a global list of unique Suppliers with current flag state,
-  search/filter controls, and flag/unflag actions. The selected Finisher is
-  optional context for showing Supplier relevance.
+- **Finisher Traceability:** one searchable Toy catalog for the selected
+  Finisher with an `All statuses` filter by default, individual
+  impact-status filters, ten-row client-side pagination, and Toy
+  Investigation drill-down;
+- **Suppliers:** a global Supplier registry with search/filter controls,
+  flag/unflag actions, and Supplier detail for Factories and supplied Parts.
 
-**Toy Investigation** is a drill-down view opened from the Toys list. It
-shows the selected Toy's Parts and possible source paths, with contextual
-Supplier flag actions. The UI must not render the entire relationship graph
-as one equally weighted page.
+Toy Investigation shows the selected Toy's Parts and possible source paths,
+with contextual Supplier flag actions. Supplier detail is read-only. Neither
+page renders the entire relationship graph as one equally weighted page.
 
-The first Toys/catalog visit requires explicit Finisher selection because
-authentication and user accounts are out of scope. Supplier Review can be
+The first Finisher Traceability visit requires explicit Finisher selection
+because authentication and user accounts are out of scope. Suppliers can be
 opened without a selected Finisher. When present, the selected Finisher
-remains visible across the Finisher-scoped views. The UI uses progressive
-disclosure: summaries and risk signals come first, while Parts and source
-paths are opened on demand.
+remains visible on the traceability page and may provide relevance context on
+the Supplier page. The UI uses progressive disclosure: summaries and risk
+signals come first, while Parts, source paths, Factories, and supplied Parts
+are opened on demand.
 
 The current MVP reuses the existing compact Toy summary and on-demand detail
 endpoints. It may derive simple status counts from the loaded summary list;
@@ -269,9 +274,10 @@ it does not add a separate Toy overview endpoint, exposure projection, or
 server-side pagination for the take-home. The browser paginates the loaded
 summary list in ten-row pages. Supplier Review uses the global Supplier
 collection by default and may use the focused `finisher_id` query only for
-relevance context, rather than fetching every Toy detail in the browser. The
-UI must still represent loading, empty, error, and mutation states. Full
-administration navigation is deferred.
+relevance context, rather than fetching every Toy detail in the browser.
+Supplier detail may use one focused read rather than reconstructing its
+Factories and Parts from Toy details. The UI must still represent loading,
+empty, error, and mutation states. Full administration navigation is deferred.
 
 Frontend API calls will be centralized behind a small typed client using the
 browser's native `fetch`. After a Supplier mutation, the dashboard will

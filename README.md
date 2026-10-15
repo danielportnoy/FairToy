@@ -8,8 +8,9 @@ labor.
 ## Status
 
 The foundation, impact-analysis service, repository boundary, API, and initial
-frontend slice are implemented. The frontend workflow is organized around one
-Toys workspace, a global Supplier Review, and Toy Investigation.
+frontend slice are implemented. The frontend workflow is organized around
+Finisher Traceability and a global Suppliers page, with Toy and Supplier
+detail drill-downs.
 The implementation follows the decisions in
 [`SPEC.md`](SPEC.md).
 
@@ -117,6 +118,7 @@ GET /api/toys?finisher_id=FIN-001
 GET /api/toys/{toy_id}?finisher_id=FIN-001
 GET /api/suppliers
 GET /api/suppliers?finisher_id=FIN-001
+GET /api/suppliers/{supplier_id}
 PATCH /api/suppliers/{supplier_id}
 ```
 
@@ -147,10 +149,11 @@ Open <http://127.0.0.1:5173>. The Vite development server proxies `/api`
 requests to the FastAPI server at `http://127.0.0.1:8000`. The frontend
 currently provides a Finisher selector, compact Toy impact list, Toy
 traceability detail, and contextual Supplier flag controls. The agreed
-workflow is one Toys workspace with an `All statuses` filter by default,
-individual impact-status filters, search, and ten-row client-side pagination,
-plus a global Supplier Review workspace that can be opened before selecting a
-Finisher. A selected Finisher can optionally provide relevance context.
+workflow has a Finisher Traceability page with an `All statuses` filter by
+default, individual impact-status filters, search, ten-row client-side
+pagination, and Toy investigation, plus a global Suppliers page with
+read-only Supplier detail and flag controls. The Suppliers page can be opened
+before selecting a Finisher.
 Authentication, administration, and generic CRUD remain out of scope.
 
 Frontend checks:

@@ -38,6 +38,32 @@ class SupplierSummary:
     related_toy_count: int | None = None
 
 
+@dataclass(frozen=True)
+class SupplierFactorySummary:
+    factory_id: str
+    factory_name: str
+    address_line: str | None
+    city: str | None
+    country: str | None
+
+
+@dataclass(frozen=True)
+class SupplierPartSummary:
+    part_id: str
+    part_name: str
+
+
+@dataclass(frozen=True)
+class SupplierDetailSummary:
+    supplier_id: str
+    supplier_name: str
+    hq_country: str | None
+    child_labor_flagged: bool
+    flagged_at: datetime | None
+    factories: tuple[SupplierFactorySummary, ...]
+    supplied_parts: tuple[SupplierPartSummary, ...]
+
+
 @dataclass
 class _ToyAccumulator:
     finisher_id: str
@@ -137,6 +163,68 @@ class TraceabilityRepository:
                 related_toy_count=getattr(row, "related_toy_count", None),
             )
             for row in rows
+        )
+
+    def get_supplier_detail(
+        self,
+        supplier_id: str,
+    ) -> SupplierDetailSummary | None:
+        self._validate_identifier(supplier_id, "supplier_id")
+        supplier_row = self._session.execute(
+            select(
+                Supplier.supplier_id,
+                Supplier.supplier_name,
+                Supplier.hq_country,
+                Supplier.child_labor_flagged,
+                Supplier.flagged_at,
+            ).where(Supplier.supplier_id == supplier_id)
+        ).first()
+        if supplier_row is None:
+            return None
+
+        factory_rows = self._session.execute(
+            select(
+                Factory.factory_id,
+                Factory.factory_name,
+                Factory.address_line,
+                Factory.city,
+                Factory.country,
+            )
+            .where(Factory.supplier_id == supplier_id)
+            .order_by(Factory.factory_id)
+        ).all()
+        part_rows = self._session.execute(
+            select(Part.part_id, Part.part_name)
+            .join(PartSource, PartSource.part_id == Part.part_id)
+            .join(Factory, Factory.factory_id == PartSource.factory_id)
+            .where(Factory.supplier_id == supplier_id)
+            .distinct()
+            .order_by(Part.part_id)
+        ).all()
+
+        return SupplierDetailSummary(
+            supplier_id=supplier_row.supplier_id,
+            supplier_name=supplier_row.supplier_name,
+            hq_country=supplier_row.hq_country,
+            child_labor_flagged=supplier_row.child_labor_flagged,
+            flagged_at=supplier_row.flagged_at,
+            factories=tuple(
+                SupplierFactorySummary(
+                    factory_id=row.factory_id,
+                    factory_name=row.factory_name,
+                    address_line=row.address_line,
+                    city=row.city,
+                    country=row.country,
+                )
+                for row in factory_rows
+            ),
+            supplied_parts=tuple(
+                SupplierPartSummary(
+                    part_id=row.part_id,
+                    part_name=row.part_name,
+                )
+                for row in part_rows
+            ),
         )
 
     def update_supplier_flag(

@@ -7,14 +7,19 @@ import { SupplierWorkspace } from "./components/SupplierWorkspace";
 import { ToyInvestigation } from "./components/ToyInvestigation";
 import { ToysWorkspace } from "./components/ToysWorkspace";
 import { useFairToyData } from "./useFairToyData";
-import type { Workspace } from "./view-model";
+import type { AppPage } from "./view-model";
 import "./styles.css";
 
 function AppShell() {
   const [selectedFinisherId, setSelectedFinisherId] = useState("");
   const [selectedToyId, setSelectedToyId] = useState("");
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace>("toys");
-  const fairToyData = useFairToyData(selectedFinisherId, selectedToyId);
+  const [selectedSupplierId, setSelectedSupplierId] = useState("");
+  const [activePage, setActivePage] = useState<AppPage>("traceability");
+  const fairToyData = useFairToyData(
+    selectedFinisherId,
+    selectedToyId,
+    selectedSupplierId,
+  );
   const { suppliers, updateSupplierFlag } = fairToyData;
 
   const selectedFinisher = fairToyData.finishers.find(
@@ -24,12 +29,36 @@ function AppShell() {
   const handleFinisherChange = useCallback((finisherId: string) => {
     setSelectedFinisherId(finisherId);
     setSelectedToyId("");
-    setActiveWorkspace("toys");
+    setSelectedSupplierId("");
+    setActivePage("traceability");
   }, []);
 
   const openInvestigation = useCallback((toyId: string) => {
     setSelectedToyId(toyId);
-    setActiveWorkspace("investigation");
+    setActivePage("traceability");
+  }, []);
+
+  const openSupplierDetail = useCallback((supplierId: string) => {
+    setSelectedSupplierId(supplierId);
+    setSelectedToyId("");
+    setActivePage("suppliers");
+  }, []);
+
+  const handlePageChange = useCallback((page: AppPage) => {
+    setActivePage(page);
+    if (page === "traceability") {
+      setSelectedSupplierId("");
+    } else {
+      setSelectedToyId("");
+    }
+  }, []);
+
+  const returnToSuppliers = useCallback(() => {
+    setSelectedSupplierId("");
+  }, []);
+
+  const returnToToys = useCallback(() => {
+    setSelectedToyId("");
   }, []);
 
   const confirmSupplierFlag = useCallback(
@@ -60,6 +89,17 @@ function AppShell() {
     [selectedFinisher, selectedFinisherId, suppliers, updateSupplierFlag],
   );
 
+  const confirmSupplierObjectFlag = useCallback(
+    async (supplier: Supplier, childLaborFlagged: boolean) => {
+      await confirmSupplierFlag(
+        supplier.supplier_id,
+        supplier.supplier_name,
+        childLaborFlagged,
+      );
+    },
+    [confirmSupplierFlag],
+  );
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -83,58 +123,67 @@ function AppShell() {
           finishersError={fairToyData.finishersError}
           selectedFinisherId={selectedFinisherId}
           selectedFinisher={selectedFinisher}
-          activeWorkspace={activeWorkspace}
+          activePage={activePage}
           toyCount={fairToyData.toys.length}
           supplierCount={fairToyData.suppliers.length}
           onFinisherChange={handleFinisherChange}
-          onWorkspaceChange={setActiveWorkspace}
+          onPageChange={handlePageChange}
         />
 
         <section className="content-panel panel" aria-live="polite">
-          {activeWorkspace === "suppliers" && (
+          {activePage === "suppliers" && (
             <SupplierWorkspace
               suppliers={fairToyData.suppliers}
               selectedFinisher={selectedFinisher}
+              selectedSupplierId={selectedSupplierId}
+              supplierDetail={fairToyData.supplierDetail}
+              supplierDetailLoading={fairToyData.supplierDetailLoading}
+              supplierDetailError={fairToyData.supplierDetailError}
               loading={fairToyData.suppliersLoading}
               error={fairToyData.suppliersError}
               mutationError={fairToyData.mutationError}
               updatingSupplierId={fairToyData.updatingSupplierId}
-              onSupplierFlag={(supplier: Supplier, desired) =>
-                void confirmSupplierFlag(
-                  supplier.supplier_id,
-                  supplier.supplier_name,
-                  desired,
-                )
-              }
+              onSelectSupplier={openSupplierDetail}
+              onBack={returnToSuppliers}
+              onSupplierFlag={confirmSupplierObjectFlag}
             />
           )}
 
-          {!selectedFinisherId && activeWorkspace !== "suppliers" && (
+          {!selectedFinisherId && activePage === "traceability" && (
             <SelectionRequired
               loading={fairToyData.finishersLoading}
               error={fairToyData.finishersError}
             />
           )}
 
-          {selectedFinisherId && activeWorkspace === "toys" && (
+          {selectedFinisherId &&
+            activePage === "traceability" &&
+            !selectedToyId && (
             <ToysWorkspace
               finisherId={selectedFinisherId}
               toys={fairToyData.toys}
+              relatedSuppliers={fairToyData.suppliers.filter(
+                (supplier) => (supplier.related_toy_count ?? 0) > 0,
+              )}
+              suppliersLoading={fairToyData.suppliersLoading}
               loading={fairToyData.toysLoading}
               error={fairToyData.toysError}
               selectedToyId={selectedToyId}
               onSelectToy={openInvestigation}
+              onSelectSupplier={openSupplierDetail}
             />
           )}
 
-          {selectedFinisherId && activeWorkspace === "investigation" && (
+          {selectedFinisherId &&
+            activePage === "traceability" &&
+            selectedToyId && (
             <ToyInvestigation
               detail={fairToyData.toyDetail}
               loading={fairToyData.detailLoading}
               error={fairToyData.detailError}
               mutationError={fairToyData.mutationError}
               updatingSupplierId={fairToyData.updatingSupplierId}
-              onBack={() => setActiveWorkspace("toys")}
+              onBack={returnToToys}
               onSupplierFlag={confirmSupplierFlag}
             />
           )}

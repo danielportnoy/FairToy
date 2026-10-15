@@ -10,8 +10,8 @@ full conversation.
 - `SYSTEM_DESIGN.md` is the current technical design.
 - `DECISIONS.md` contains accepted decisions; superseded iterations are
   marked rather than treated as current requirements.
-- The current workflow is one Toys list, a global Supplier Review, and Toy
-  Investigation as a drill-down.
+- The current workflow is two top-level pages: Finisher Traceability and
+  Suppliers. Toy and Supplier details are drill-downs within those pages.
 - `data/demo/` is the default small fixture set; `data/full/` preserves the
   original assignment export.
 - The latest verified Python suite has 47 passing tests; frontend checks are
@@ -509,6 +509,21 @@ source of requirements.
   Mypy, Ruff lint/format, compilation, and diff checks also passed. The
   environment still reports 11 third-party Python 3.14 deprecation warnings.
 
+## 2026-10-16 — Final two-page product boundary
+
+- **Phase:** Product design
+- **Status:** Accepted; implementation handoff
+- **Decision:** Treat the UI as two top-level product pages:
+  **Finisher Traceability** for a selected Finisher's Toys and
+  Toy → Part → Supplier → Factory investigation, and **Suppliers** for the
+  global Supplier registry and read-only Supplier → Factory/Part detail.
+- **Scope:** Supplier detail is read-only; flag/unflag is the only Supplier
+  mutation. Authentication, generic CRUD, history, and operational
+  administration remain out of scope.
+- **Rationale:** Finisher traceability and global Supplier risk management are
+  distinct workflows. This is a coherent interview-sized product boundary,
+  not a full administration system.
+
 ## 2026-10-16 — Separate frontend workflow boundaries
 
 - **Phase:** User workflow
@@ -580,6 +595,27 @@ source of requirements.
   contract for machine clients, tests, and future localization.
 - **Verification:** frontend tests passed (`12 passed`), frontend typecheck
   and production build passed, and `git diff --check` passed.
+
+## 2026-10-16 — Complete the two-page product boundary
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** complete the final two-page boundary with a Finisher
+  Traceability page and a global Suppliers page. The traceability page keeps
+  explicit Finisher selection, one Toys table, status/search/pagination
+  controls, related Supplier context, and Toy Investigation as an in-page
+  drill-down. The Suppliers page adds global Supplier search/filtering,
+  confirmed flag/unflag actions, and read-only Supplier detail with Factories
+  and supplied Parts.
+- **API:** add `GET /api/suppliers/{supplier_id}` and the focused repository
+  query and response contracts required by Supplier detail. Existing list,
+  impact, and PATCH semantics remain unchanged.
+- **Compatibility:** no new top-level route, React Router, generic CRUD,
+  authentication, history, approvals, notifications, exposure metrics,
+  pagination backend, or production infrastructure.
+- **Verification:** backend tests (`50 passed`), frontend tests (`14
+  passed`), mypy, Ruff check/format, TypeScript typecheck, production build,
+  Python compilation, and `git diff --check` passed.
 
 ## Working method
 

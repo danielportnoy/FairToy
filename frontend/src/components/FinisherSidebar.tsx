@@ -1,5 +1,5 @@
 import type { Finisher } from "../api";
-import type { Workspace } from "../view-model";
+import type { AppPage } from "../view-model";
 import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 
 interface FinisherSidebarProps {
@@ -8,11 +8,11 @@ interface FinisherSidebarProps {
   finishersError: string | null;
   selectedFinisherId: string;
   selectedFinisher: Finisher | undefined;
-  activeWorkspace: Workspace;
+  activePage: AppPage;
   toyCount: number;
   supplierCount: number;
   onFinisherChange: (finisherId: string) => void;
-  onWorkspaceChange: (workspace: "toys" | "suppliers") => void;
+  onPageChange: (page: AppPage) => void;
 }
 
 export function FinisherSidebar({
@@ -21,11 +21,11 @@ export function FinisherSidebar({
   finishersError,
   selectedFinisherId,
   selectedFinisher,
-  activeWorkspace,
+  activePage,
   toyCount,
   supplierCount,
   onFinisherChange,
-  onWorkspaceChange,
+  onPageChange,
 }: FinisherSidebarProps) {
   return (
     <aside className="catalog-panel panel">
@@ -76,23 +76,19 @@ export function FinisherSidebar({
         </div>
       )}
 
-      <nav className="view-tabs" aria-label="Workspaces">
+      <nav className="view-tabs" aria-label="Pages">
         <button
-          className={
-            activeWorkspace === "toys" || activeWorkspace === "investigation"
-              ? "is-active"
-              : ""
-          }
+          className={activePage === "traceability" ? "is-active" : ""}
           type="button"
-          onClick={() => onWorkspaceChange("toys")}
+          onClick={() => onPageChange("traceability")}
         >
-          <span>Toys</span>
+          <span>Finisher Traceability</span>
           <strong>{toyCount}</strong>
         </button>
         <button
-          className={activeWorkspace === "suppliers" ? "is-active" : ""}
+          className={activePage === "suppliers" ? "is-active" : ""}
           type="button"
-          onClick={() => onWorkspaceChange("suppliers")}
+          onClick={() => onPageChange("suppliers")}
         >
           <span>Suppliers</span>
           <strong>{supplierCount}</strong>
@@ -102,7 +98,7 @@ export function FinisherSidebar({
       {!selectedFinisherId && (
         <div className="selection-state">
           <span className="scope-dot" />
-          Select a Finisher to load Toys; Supplier Review is available now.
+          Select a Finisher to load Toys; the Suppliers page is available now.
         </div>
       )}
 

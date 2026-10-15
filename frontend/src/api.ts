@@ -27,6 +27,24 @@ export interface Supplier {
   related_toy_count: number | null;
 }
 
+export interface SupplierFactory {
+  factory_id: string;
+  factory_name: string;
+  address_line: string | null;
+  city: string | null;
+  country: string | null;
+}
+
+export interface SupplierPart {
+  part_id: string;
+  part_name: string;
+}
+
+export interface SupplierDetail extends Supplier {
+  factories: SupplierFactory[];
+  supplied_parts: SupplierPart[];
+}
+
 export interface ImpactPath {
   supplier_id: string;
   supplier_name: string;
@@ -128,6 +146,16 @@ export const fairtoyApi = {
   ): Promise<Supplier[]> {
     return request<Supplier[]>(
       finisherId ? supplierQuery(finisherId) : "/api/suppliers",
+      { signal },
+    );
+  },
+
+  getSupplier(
+    supplierId: string,
+    signal?: AbortSignal,
+  ): Promise<SupplierDetail> {
+    return request<SupplierDetail>(
+      `/api/suppliers/${encodeURIComponent(supplierId)}`,
       { signal },
     );
   },

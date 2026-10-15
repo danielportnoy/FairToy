@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { ToySummary } from "../api";
+import type { Supplier, ToySummary } from "../api";
 import {
   filterAndSortToys,
   paginate,
@@ -14,19 +14,25 @@ import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 interface ToysWorkspaceProps {
   finisherId: string;
   toys: ToySummary[];
+  relatedSuppliers: Supplier[];
+  suppliersLoading: boolean;
   loading: boolean;
   error: string | null;
   selectedToyId: string;
   onSelectToy: (toyId: string) => void;
+  onSelectSupplier: (supplierId: string) => void;
 }
 
 export function ToysWorkspace({
   finisherId,
   toys,
+  relatedSuppliers,
+  suppliersLoading,
   loading,
   error,
   selectedToyId,
   onSelectToy,
+  onSelectSupplier,
 }: ToysWorkspaceProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ToyStatusFilter>("all");
@@ -48,13 +54,13 @@ export function ToysWorkspace({
   );
 
   return (
-    <section aria-labelledby="toys-title">
+    <section aria-labelledby="traceability-title">
       <div className="view-heading">
         <div className="heading-with-icon">
           <EntityIcon type="toy" />
           <div>
             <p className="eyebrow">TOY CATALOG</p>
-            <h2 id="toys-title">Toys</h2>
+            <h2 id="traceability-title">Finisher Traceability</h2>
             <p className="view-description">
               Search the selected Finisher&apos;s Toys, filter by current impact
               status, and open a Toy investigation for evidence.
@@ -98,6 +104,12 @@ export function ToysWorkspace({
         </label>
       </div>
 
+      <RelatedSupplierContext
+        suppliers={relatedSuppliers}
+        loading={suppliersLoading}
+        onSelectSupplier={onSelectSupplier}
+      />
+
       {loading && <p className="muted">Calculating current impact…</p>}
       {error && <ErrorNotice message={error} />}
       {!loading && !error && (
@@ -110,6 +122,69 @@ export function ToysWorkspace({
           onPageChange={setPage}
           onSelect={onSelectToy}
         />
+      )}
+    </section>
+  );
+}
+
+interface RelatedSupplierContextProps {
+  suppliers: Supplier[];
+  loading: boolean;
+  onSelectSupplier: (supplierId: string) => void;
+}
+
+function RelatedSupplierContext({
+  suppliers,
+  loading,
+  onSelectSupplier,
+}: RelatedSupplierContextProps) {
+  return (
+    <section
+      className="related-supplier-context"
+      aria-labelledby="related-suppliers-title"
+    >
+      <div className="related-supplier-heading">
+        <div className="heading-with-icon">
+          <EntityIcon type="supplier" />
+          <div>
+            <p className="eyebrow">CATALOG CONTEXT</p>
+            <h3 id="related-suppliers-title">Related Suppliers</h3>
+          </div>
+        </div>
+        <span className="record-count">{suppliers.length}</span>
+      </div>
+      {loading && <p className="muted">Loading Supplier context…</p>}
+      {!loading && suppliers.length === 0 && (
+        <p className="muted">No related Suppliers are recorded.</p>
+      )}
+      {!loading && suppliers.length > 0 && (
+        <div className="related-supplier-list">
+          {suppliers.map((supplier) => (
+            <button
+              className="related-supplier"
+              key={supplier.supplier_id}
+              type="button"
+              onClick={() => onSelectSupplier(supplier.supplier_id)}
+            >
+              <span className="related-supplier-copy">
+                <strong>{supplier.supplier_name}</strong>
+                <span>
+                  {supplier.related_toy_count ?? 0} related Toy
+                  {supplier.related_toy_count === 1 ? "" : "s"}
+                </span>
+              </span>
+              <span
+                className={`status ${
+                  supplier.child_labor_flagged
+                    ? "status-affected"
+                    : "status-unaffected"
+                }`}
+              >
+                {supplier.child_labor_flagged ? "Flagged" : "Clear"}
+              </span>
+            </button>
+          ))}
+        </div>
       )}
     </section>
   );

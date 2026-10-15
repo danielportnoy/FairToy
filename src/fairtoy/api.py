@@ -14,7 +14,10 @@ from .api_schemas import (
     FinisherResponse,
     ImpactPathResponse,
     PartImpactResponse,
+    SupplierDetailResponse,
+    SupplierFactoryResponse,
     SupplierFlagUpdateRequest,
+    SupplierPartResponse,
     SupplierResponse,
     ToyDetailResponse,
     ToySummaryResponse,
@@ -28,7 +31,11 @@ from .impact import (
     calculate_toy_impact,
     calculate_toy_impacts,
 )
-from .repository import SupplierSummary, TraceabilityRepository
+from .repository import (
+    SupplierDetailSummary,
+    SupplierSummary,
+    TraceabilityRepository,
+)
 
 
 def create_app(
@@ -78,6 +85,20 @@ def create_app(
             _supplier_response(supplier)
             for supplier in repository.list_suppliers(finisher_id=finisher_id)
         ]
+
+    @app.get(
+        "/api/suppliers/{supplier_id}",
+        response_model=SupplierDetailResponse,
+    )
+    def get_supplier(
+        supplier_id: str,
+        session: Session = Depends(get_session),
+    ) -> SupplierDetailResponse:
+        _require_identifier(supplier_id, "supplier_id")
+        detail = TraceabilityRepository(session).get_supplier_detail(supplier_id)
+        if detail is None:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+        return _supplier_detail_response(detail)
 
     @app.patch(
         "/api/suppliers/{supplier_id}",
@@ -180,6 +201,35 @@ def _supplier_response(supplier: SupplierSummary) -> SupplierResponse:
         child_labor_flagged=supplier.child_labor_flagged,
         flagged_at=_as_utc(supplier.flagged_at),
         related_toy_count=supplier.related_toy_count,
+    )
+
+
+def _supplier_detail_response(
+    detail: SupplierDetailSummary,
+) -> SupplierDetailResponse:
+    return SupplierDetailResponse(
+        supplier_id=detail.supplier_id,
+        supplier_name=detail.supplier_name,
+        hq_country=detail.hq_country,
+        child_labor_flagged=detail.child_labor_flagged,
+        flagged_at=_as_utc(detail.flagged_at),
+        factories=[
+            SupplierFactoryResponse(
+                factory_id=factory.factory_id,
+                factory_name=factory.factory_name,
+                address_line=factory.address_line,
+                city=factory.city,
+                country=factory.country,
+            )
+            for factory in detail.factories
+        ],
+        supplied_parts=[
+            SupplierPartResponse(
+                part_id=part.part_id,
+                part_name=part.part_name,
+            )
+            for part in detail.supplied_parts
+        ],
     )
 
 

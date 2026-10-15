@@ -48,6 +48,17 @@ describe("fairtoyApi", () => {
     expect(input).toBe("/api/suppliers");
   });
 
+  it("loads focused Supplier detail", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse({}));
+
+    await expect(fairtoyApi.getSupplier("SUP/1")).resolves.toEqual({});
+
+    const [input] = fetchMock.mock.calls[0] ?? [];
+    expect(input).toBe("/api/suppliers/SUP%2F1");
+  });
+
   it("sends an explicit Supplier flag state", async () => {
     const supplier = {
       supplier_id: "SUP/1",

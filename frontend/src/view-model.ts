@@ -4,7 +4,7 @@ import {
   type ToySummary,
 } from "./api";
 
-export type Workspace = "toys" | "suppliers" | "investigation";
+export type AppPage = "traceability" | "suppliers";
 export type ToyStatusFilter = "all" | ImpactStatus;
 export type SupplierFilter = "all" | "flagged" | "unflagged";
 

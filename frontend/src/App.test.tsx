@@ -88,6 +88,25 @@ function supplier(flagged: boolean) {
   };
 }
 
+const supplierDetail = {
+  ...supplier(false),
+  factories: [
+    {
+      factory_id: "FAC-1",
+      factory_name: "Factory One",
+      address_line: "1 Factory Road",
+      city: "Copenhagen",
+      country: "Denmark",
+    },
+  ],
+  supplied_parts: [
+    {
+      part_id: "PRT-1",
+      part_name: "Canvas tent",
+    },
+  ],
+};
+
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status: 200,
@@ -131,7 +150,7 @@ describe("FairToy dashboard", () => {
     });
 
     expect(
-      await screen.findByRole("heading", { name: "Toys" }),
+      await screen.findByRole("heading", { name: "Finisher Traceability" }),
     ).toBeTruthy();
     expect(screen.getByRole("button", { name: /Affected Camp/ })).toBeTruthy();
     expect(
@@ -191,7 +210,7 @@ describe("FairToy dashboard", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: "Supplier Review" }),
+      await screen.findByRole("heading", { name: "Suppliers" }),
     ).toBeTruthy();
     expect(
       screen.queryByRole("heading", { name: "Choose a Finisher to begin." }),
@@ -209,6 +228,44 @@ describe("FairToy dashboard", () => {
       expect.stringContaining("flag Supplier One globally"),
     );
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("opens read-only Supplier detail from the global Supplier page", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input) => {
+        const path = String(input);
+        if (path === "/api/finishers") {
+          return jsonResponse([finisher]);
+        }
+        if (path === "/api/suppliers") {
+          return jsonResponse([supplier(false)]);
+        }
+        if (path === "/api/suppliers/SUP-1") {
+          return jsonResponse(supplierDetail);
+        }
+        throw new Error(`Unexpected request: ${path}`);
+      });
+
+    render(<App />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: /^Suppliers/ }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Supplier One/ }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "Supplier One" }),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Factories" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Supplied Parts" })).toBeTruthy();
+    expect(screen.getByText("Factory One")).toBeTruthy();
+    expect(screen.getByText("Canvas tent")).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/suppliers/SUP-1",
+      expect.objectContaining({ headers: expect.any(Headers) }),
+    );
   });
 
   it("explains when a flagged Supplier has no current impact for the Finisher", async () => {

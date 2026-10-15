@@ -145,14 +145,15 @@ the customer's upstream systems.
   relationships.
 - Because authentication is out of scope, the first visit requires an explicit
   Finisher selection; the UI must not silently choose an arbitrary Finisher.
-- The Finisher has one Toys workspace with an `All statuses` filter by
-  default. The user can filter to affected, potentially affected, or
-  unaffected Toys. Search, status filtering, and ten-row client-side
+- The Finisher Traceability page has one Toys list with an `All statuses`
+  filter by default. The user can filter to affected, potentially affected,
+  or unaffected Toys. Search, status filtering, and ten-row client-side
   pagination apply to the same list.
-- Supplier Review is a centralized global workspace showing all Suppliers,
+- The Suppliers page is a centralized global registry showing all Suppliers,
   even when a Supplier is not currently related to the selected Finisher. It
-  is the primary place to review and flag Suppliers; Supplier actions may
-  also remain available in Toy investigation for context.
+  is the primary place to review and flag Suppliers and inspect their
+  Factories and supplied Parts. Supplier actions may also remain available in
+  Toy investigation for context.
 - If a Finisher is selected while reviewing Suppliers, the UI may show
   relevance to that catalog. A Supplier that is not currently related can
   still be flagged, with the UI explaining that no current Toy impact is
@@ -174,10 +175,11 @@ the customer's upstream systems.
 - A user can select a Finisher and browse its toys.
 - A first-time user can explicitly select the active Finisher before viewing
   catalog data.
-- The user can open the Toys workspace, filter the same list by impact status,
-  paginate it, and open a Toy investigation from any result.
-- The user can open Supplier Review without a selected Finisher, review all
-  Suppliers, and flag or unflag a Supplier.
+- The user can open Finisher Traceability, filter and paginate its Toy list,
+  and open a Toy investigation from any result.
+- The user can open Suppliers without a selected Finisher, review all
+  Suppliers, inspect a Supplier's Factories and supplied Parts, and flag or
+  unflag a Supplier.
 - A user can inspect a toy's parts, possible sources, suppliers, and factories.
 - Supplier flagging is confirmed in the UI and the resulting global impact
   changes are visible after the authoritative data is refreshed.
