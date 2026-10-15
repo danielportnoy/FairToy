@@ -245,6 +245,21 @@ full conversation.
 - **Explicit deferral:** migrations, deployment infrastructure, and unrelated
   database abstractions remain out of scope.
 
+## 2026-10-15 — Edge-case coverage / Slice 9
+
+- **Phase:** Verification
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add focused tests for empty Toys, invalid impact facts, malformed
+  numeric fixture values, and missing fixture files while retaining the
+  supplied real-fixture integration coverage.
+- **Behavior:** no production behavior or API contract changes.
+- **Verification:** focused domain/importer tests passed (`19 passed`); the
+  full suite passed (`43 passed`), with Ruff, format, mypy, compilation, and
+  diff checks also passing. The environment still reports 11 third-party
+  Python 3.14 deprecation warnings.
+- **Explicit deferral:** browser automation, deployment infrastructure, and
+  unrelated feature work remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

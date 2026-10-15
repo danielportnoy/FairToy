@@ -210,3 +210,43 @@ def test_sqlite_foreign_keys_and_domain_checks_are_enabled(
                 session.commit()
     finally:
         engine.dispose()
+
+
+def test_invalid_numeric_fixture_fails_before_writing_any_rows(
+    tmp_path: Path,
+) -> None:
+    fixture_dir = tmp_path / "data"
+    shutil.copytree(FIXTURE_DIR, fixture_dir)
+    toys_path = fixture_dir / "toys.csv"
+    toys = toys_path.read_text(encoding="utf-8")
+    updated_toys = toys.replace(
+        "TOY-0275,Copper Camp,FIN-003,39.5,3173720",
+        "TOY-0275,Copper Camp,FIN-003,not-a-price,3173720",
+        1,
+    )
+    assert updated_toys != toys
+    toys_path.write_text(updated_toys, encoding="utf-8")
+
+    engine, session_factory = _session_for(tmp_path / "fairtoy.sqlite3")
+    try:
+        with session_factory() as session:
+            with pytest.raises(
+                ImportValidationError,
+                match="retail_price_usd must be a number",
+            ):
+                import_fixtures(session, fixture_dir)
+
+        with session_factory() as session:
+            assert _count(session, Finisher) == 0
+            assert _count(session, Supplier) == 0
+    finally:
+        engine.dispose()
+
+
+def test_missing_fixture_file_has_an_actionable_error(tmp_path: Path) -> None:
+    fixture_dir = tmp_path / "data"
+    shutil.copytree(FIXTURE_DIR, fixture_dir)
+    (fixture_dir / "suppliers.csv").unlink()
+
+    with pytest.raises(ImportValidationError, match="Missing required fixture file"):
+        read_source_data(fixture_dir)

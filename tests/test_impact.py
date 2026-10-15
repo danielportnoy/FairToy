@@ -10,8 +10,10 @@ from fairtoy.impact import (
     POTENTIALLY_AFFECTED,
     UNAFFECTED,
     ImpactInputError,
+    ToyTraceability,
     TraceabilityFact,
     calculate_impact,
+    calculate_toy_impact,
 )
 
 
@@ -207,3 +209,44 @@ def test_source_and_no_source_facts_cannot_be_mixed() -> None:
                 source_fact(),
             ]
         )
+
+
+def test_empty_toy_is_unaffected_without_any_required_parts() -> None:
+    result = calculate_toy_impact(
+        ToyTraceability(
+            finisher_id="FIN-1",
+            toy_id="TOY-EMPTY",
+            toy_name="Empty Toy",
+            facts=(),
+        )
+    )
+
+    assert result.toy_id == "TOY-EMPTY"
+    assert result.status == UNAFFECTED
+    assert result.parts == ()
+
+
+def test_single_toy_calculation_rejects_facts_for_multiple_toys() -> None:
+    with pytest.raises(ImpactInputError, match="produced 2 Toys"):
+        calculate_toy_impact(
+            ToyTraceability(
+                finisher_id="FIN-1",
+                toy_id="TOY-1",
+                toy_name="Test Toy",
+                facts=(
+                    source_fact(),
+                    replace(source_fact(), toy_id="TOY-2"),
+                ),
+            )
+        )
+
+
+def test_invalid_source_shapes_and_values_are_rejected() -> None:
+    with pytest.raises(ImpactInputError, match="quantity"):
+        calculate_impact([source_fact(quantity=True)])
+
+    with pytest.raises(ImpactInputError, match="source fields must be complete"):
+        calculate_impact([replace(source_fact(), factory_name=None)])
+
+    with pytest.raises(ImpactInputError, match="finite"):
+        calculate_impact([replace(source_fact(), unit_cost_usd=Decimal("NaN"))])
