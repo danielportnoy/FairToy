@@ -6,7 +6,7 @@ import {
   formatDate,
   type SupplierFilter,
 } from "../view-model";
-import { EmptyNotice, ErrorNotice } from "./Shared";
+import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 
 interface SupplierWorkspaceProps {
   suppliers: Supplier[];
@@ -40,15 +40,18 @@ export function SupplierWorkspace({
   return (
     <section aria-labelledby="supplier-review-title">
       <div className="view-heading">
-        <div>
-          <p className="eyebrow">SUPPLIER WORKSPACE</p>
-          <h2 id="supplier-review-title">Supplier Review</h2>
-          <p className="view-description">
-            Review all Suppliers and their global risk state.
-            {selectedFinisher
-              ? ` Related-Toy counts below are for ${selectedFinisher.finisher_name}.`
-              : " Select a Finisher to see catalog relevance."}
-          </p>
+        <div className="heading-with-icon">
+          <EntityIcon type="supplier" />
+          <div>
+            <p className="eyebrow">SUPPLIER WORKSPACE</p>
+            <h2 id="supplier-review-title">Supplier Review</h2>
+            <p className="view-description">
+              Review all Suppliers and their global risk state.
+              {selectedFinisher
+                ? ` Related-Toy counts below are for ${selectedFinisher.finisher_name}.`
+                : " Select a Finisher to see catalog relevance."}
+            </p>
+          </div>
         </div>
         <span className="record-count">{visibleSuppliers.length}</span>
       </div>
@@ -138,24 +141,27 @@ function SupplierRow({
 
   return (
     <article className="supplier-row">
-      <div className="supplier-main">
-        <span className="detail-id">{supplier.supplier_id}</span>
-        <strong>{supplier.supplier_name}</strong>
-        <span>
-          {selectedFinisher ? (
-            <>
-              {relatedToyCount} related Toy{relatedToyCount === 1 ? "" : "s"}
-              {hasNoCurrentImpact
-                ? " · no current Toy impact for this Finisher"
-                : ""}
-            </>
-          ) : (
-            "Global Supplier"
-          )}
-          {supplier.flagged_at
-            ? ` · flagged ${formatDate(supplier.flagged_at)}`
-            : " · not flagged"}
-        </span>
+      <div className="supplier-identity">
+        <EntityIcon type="supplier" />
+        <div className="supplier-main">
+          <span className="detail-id">{supplier.supplier_id}</span>
+          <strong>{supplier.supplier_name}</strong>
+          <span>
+            {selectedFinisher ? (
+              <>
+                {relatedToyCount} related Toy{relatedToyCount === 1 ? "" : "s"}
+                {hasNoCurrentImpact
+                  ? " · no current Toy impact for this Finisher"
+                  : ""}
+              </>
+            ) : (
+              "Global Supplier"
+            )}
+            {supplier.flagged_at
+              ? ` · flagged ${formatDate(supplier.flagged_at)}`
+              : " · not flagged"}
+          </span>
+        </div>
       </div>
       <div className="supplier-action">
         <span

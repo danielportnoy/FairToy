@@ -4,6 +4,22 @@ This log records the working flow, checkpoints, AI boundaries, and review
 outcomes. It intentionally summarizes the process rather than copying the
 full conversation.
 
+## Current handoff state
+
+- `SPEC.md` is the product and domain contract.
+- `SYSTEM_DESIGN.md` is the current technical design.
+- `DECISIONS.md` contains accepted decisions; superseded iterations are
+  marked rather than treated as current requirements.
+- The current workflow is one Toys list, a global Supplier Review, and Toy
+  Investigation as a drill-down.
+- `data/demo/` is the default small fixture set; `data/full/` preserves the
+  original assignment export.
+- The latest verified Python suite has 47 passing tests; frontend checks are
+  recorded in the implementation entries below.
+
+The dated entries that follow are historical checkpoints, not an additional
+source of requirements.
+
 ## 2026-10-14 — Domain framing
 
 - **Phase:** Domain discovery and scope definition
@@ -449,7 +465,7 @@ full conversation.
   Investigation because the user-facing status badge and explanation already
   communicate the result.
 - **Compatibility:** retain `reason_code` in the API and frontend data
-  contract, and retain Part-level reason codes inside the expandable detail.
+  contract; presentation of the stable code is a separate UI decision.
 - **Verification:** frontend tests passed (`7 passed`), frontend typecheck
   and production build passed, and the full backend suite passed (`47
   passed`). Mypy, Ruff lint/format, compilation, and diff checks also passed.
@@ -509,6 +525,59 @@ full conversation.
   behavior changed. Toys remain explicitly Finisher-scoped, Supplier Review
   remains global, and Toy Investigation retains expandable source paths and
   contextual Supplier actions.
+- **Verification:** frontend tests passed (`12 passed`), frontend typecheck
+  and production build passed, and `git diff --check` passed.
+
+## 2026-10-16 — Polish frontend visual design
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** improve the existing UI presentation without changing workflow
+  behavior, API contracts, or domain semantics.
+- **Visual changes:** introduce shared color tokens, stronger panel and card
+  hierarchy, clearer status and action treatments, improved form controls and
+  focus states, refined spacing and shadows, and more deliberate responsive
+  breakpoints.
+- **Compatibility:** no markup workflow, API, schema, impact rule, or
+  navigation behavior changed.
+- **Verification:** frontend tests passed (`12 passed`), frontend typecheck
+  and production build passed, and `git diff --check` passed.
+
+## 2026-10-16 — Add a traceability icon and restrained motion
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** replace the text-only `FT` marks with a reusable inline SVG
+  traceability mark and add subtle visual motion to the existing surfaces.
+- **Accessibility:** the motion is disabled for users who prefer reduced
+  motion; the icon includes an accessible label when it is not decorative.
+- **Compatibility:** no dependency, API, workflow, or domain changes.
+- **Verification:** frontend tests passed (`12 passed`), frontend typecheck
+  and production build passed, and `git diff --check` passed.
+
+## 2026-10-16 — Add entity icons to the traceability workflow
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** add reusable inline SVG icons for Finishers, Suppliers, Toys,
+  Parts, and Factories at the existing workspace, row, and detail
+  touchpoints.
+- **Design:** icons are color-coded by entity type and remain decorative for
+  assistive technology because the adjacent text supplies the entity label.
+  No icon dependency was introduced.
+- **Compatibility:** no workflow, API, schema, impact, or navigation changes.
+- **Verification:** frontend tests passed (`12 passed`), frontend typecheck
+  and production build passed, and `git diff --check` passed.
+
+## 2026-10-16 — Hide redundant Part reason-code presentation
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review
+- **Scope:** remove the visible Part-level `reason_code` from Toy
+  Investigation because the human-readable Part explanation is sufficient for
+  the current UI.
+- **Compatibility:** retain `reason_code` in the API and frontend data
+  contract for machine clients, tests, and future localization.
 - **Verification:** frontend tests passed (`12 passed`), frontend typecheck
   and production build passed, and `git diff --check` passed.
 

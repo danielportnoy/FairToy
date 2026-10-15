@@ -1,6 +1,6 @@
 import type { Finisher } from "../api";
 import type { Workspace } from "../view-model";
-import { EmptyNotice, ErrorNotice } from "./Shared";
+import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 
 interface FinisherSidebarProps {
   finishers: Finisher[];
@@ -30,9 +30,12 @@ export function FinisherSidebar({
   return (
     <aside className="catalog-panel panel">
       <div className="panel-heading">
-        <div>
-          <p className="eyebrow">CATALOG CONTEXT</p>
-          <h2>Choose a Finisher</h2>
+        <div className="heading-with-icon">
+          <EntityIcon type="finisher" />
+          <div>
+            <p className="eyebrow">CATALOG CONTEXT</p>
+            <h2>Choose a Finisher</h2>
+          </div>
         </div>
         <span className="record-count">{finishers.length}</span>
       </div>

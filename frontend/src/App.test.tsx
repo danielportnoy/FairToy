@@ -292,6 +292,7 @@ describe("FairToy dashboard", () => {
     ).toBeTruthy();
     expect(screen.getByText("Supplier One")).toBeTruthy();
     expect(screen.queryByText("toy_affected")).toBeNull();
+    expect(screen.queryByText("part_all_sources_flagged")).toBeNull();
 
     fireEvent.click(await screen.findByRole("button", { name: "Flag supplier" }));
 

@@ -396,26 +396,21 @@ not a transcript of the planning conversation.
   response, but it directly satisfies the traceability requirement. Summary
   reads must not include the full path graph.
 
-## D036 — Use a progressive-disclosure Finisher workflow
+## D036 — Use a focused progressive-disclosure workflow
 
-- **Status:** Superseded by D043; Supplier portion refined by D045
-- **Decision:** Organize the MVP into two top-level workspaces:
-  - **Toys:** one searchable catalog with a default `Needs attention` mode
-    showing affected and potentially affected Toys, plus an `All inventory`
-    mode that includes unaffected Toys;
-  - **Suppliers:** a centralized list of Suppliers with their current risk
-    state and flag/unflag action.
-  A selected Toy opens **Toy Investigation** as a drill-down view from either
-  Toys mode. The UI must not render the entire relationship graph as one
-  equally weighted page.
-- **Rationale:** Needs Attention and Inventory are two filters over the same
-  Toy resource, not two different user workflows. Combining them removes a
-  duplicated list while preserving risk-first triage and complete inventory
-  access. Supplier review is a distinct workflow because Supplier is the risk
-  subject and the flag action must be discoverable.
-- **Trade-off:** The workflow adds a focused global Supplier workspace, but
-  avoids both duplicate Toy tabs and generic administration screens. A
-  purpose-built Toy overview projection is not required for this MVP.
+- **Status:** Accepted
+- **Decision:** Use two top-level workspaces:
+  - **Toys:** one list with explicit impact-status filters, search, and
+    client-side pagination;
+  - **Suppliers:** a global risk registry with search, flag state, and
+    flag/unflag actions.
+  Toy Investigation is a drill-down from the Toys list. Parts and source
+  paths use progressive disclosure.
+- **Rationale:** Toys, Suppliers, and traceability evidence are different
+  user tasks. One Toy list avoids duplicate tabs, while a separate Supplier
+  workspace makes the required global risk action discoverable.
+- **Trade-off:** The UI has two workspaces and one drill-down, but no generic
+  administration area or speculative dashboard infrastructure.
 
 ## D037 — Require explicit Finisher context without authentication
 
@@ -494,35 +489,14 @@ not a transcript of the planning conversation.
 ## D042 — Add a focused Finisher-scoped Supplier Review read
 
 - **Status:** Superseded by D045
-- **Decision:** Support Supplier Review with a workflow-specific read such as
-  `GET /api/suppliers?finisher_id={finisher_id}`. Return one row per unique
-  Supplier reachable from the selected Finisher's Toy catalog, including
-  current flag state, `flagged_at`, and a related-Toy count where practical.
-  Keep the existing global Supplier flag mutation and do not add generic
-  Supplier CRUD.
-- **Rationale:** A Finisher must be able to discover and flag a Supplier from
-  a centralized place. Reconstructing Supplier relationships by fetching
-  every Toy detail would create an avoidable N+1 request pattern, while
-  showing every global Supplier would add irrelevant noise.
-- **Trade-off:** This adds one small workflow query and its tests, but keeps
-  the Supplier workspace relevant to the active Finisher without changing
-  the global Supplier risk semantics.
+- **Decision:** An earlier iteration scoped Supplier Review to the selected
+  Finisher. The final global behavior is defined by D045.
 
 ## D043 — Use one Toys list with a status filter
 
 - **Status:** Superseded by D044
-- **Decision:** Keep one Toys workspace and one list. The default status
-  filter is `Needs attention`, meaning affected and potentially affected
-  Toys. `All statuses` includes unaffected Toys. Search, status filtering,
-  and client-side pagination of ten rows per page operate on that same list.
-  Toy Investigation remains a drill-down, and Suppliers remains a separate
-  workspace.
-- **Rationale:** Needs attention is a useful starting filter, not a second
-  information architecture concept. One list makes the relationship between
-  triage and complete inventory explicit while avoiding duplicated controls.
-- **Boundary:** Pagination is intentionally client-side over the existing
-  compact summary response. No pagination API, new endpoint, or server-side
-  projection is added for this take-home.
+- **Decision:** An earlier iteration used a risk-only default for the Toys
+  list. The final explicit-filter behavior is defined by D044.
 
 ## D044 — Keep status filtering explicit without a risk-only default
 

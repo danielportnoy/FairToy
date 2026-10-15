@@ -2,10 +2,9 @@
 
 ## Document status
 
-This is the working product and domain specification for the FairToy
-take-home assignment. It captures decisions made before implementation.
-Physical schema, API details, and frontend structure will be decided during
-the system-design phase.
+This is the product and domain contract for the FairToy take-home assignment.
+Technical implementation details live in [`SYSTEM_DESIGN.md`](SYSTEM_DESIGN.md);
+decision rationale lives in [`DECISIONS.md`](DECISIONS.md).
 
 ## Outcome
 
@@ -191,15 +190,11 @@ the customer's upstream systems.
 - The core impact rule has automated tests.
 - The repository includes clear setup and run instructions.
 
-## Deferred system-design questions
+## Future extensions
 
-- Exact SQLite schema and constraints.
-- Import command and migration strategy.
-- API endpoints, HTTP methods, and response shapes.
-- Query shape, indexes, and repository boundaries.
-- UI loading, empty, and error states.
-- Materialized impact projections or event-driven recalculation at scale.
-- Server-side pagination or lazy loading for high-fanout detail reads.
+- Source allocation per Finisher or production batch.
 - Factory-level risk observations and risk precedence.
 - Supplier risk history, evidence, actors, and approvals.
-- Optional CRUD capabilities after the core workflow is complete.
+- Materialized impact projections or event-driven recalculation at scale.
+- Server-side pagination or lazy loading for high-fanout detail reads.
+- Optional CRUD and operational workflows.

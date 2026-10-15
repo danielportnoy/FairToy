@@ -8,8 +8,8 @@ labor.
 ## Status
 
 The foundation, impact-analysis service, repository boundary, API, and initial
-frontend slice are implemented. The frontend workflow is being refined around
-one Toys workspace, a Finisher-scoped Supplier Review, and Toy Investigation.
+frontend slice are implemented. The frontend workflow is organized around one
+Toys workspace, a global Supplier Review, and Toy Investigation.
 The implementation follows the decisions in
 [`SPEC.md`](SPEC.md).
 

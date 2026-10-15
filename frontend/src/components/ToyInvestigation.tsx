@@ -4,7 +4,7 @@ import {
   statusClass,
   statusLabel,
 } from "../view-model";
-import { EmptyNotice, ErrorNotice } from "./Shared";
+import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 
 interface ToyInvestigationProps {
   detail: ToyDetail | null;
@@ -35,9 +35,12 @@ export function ToyInvestigation({
         ← Back to Toys
       </button>
       <div className="view-heading investigation-heading">
-        <div>
-          <p className="eyebrow">TOY INVESTIGATION</p>
-          <h2 id="detail-title">Trace the evidence path</h2>
+        <div className="heading-with-icon">
+          <EntityIcon type="toy" />
+          <div>
+            <p className="eyebrow">TOY INVESTIGATION</p>
+            <h2 id="detail-title">Trace the evidence path</h2>
+          </div>
         </div>
         {detail && (
           <span className={statusClass(detail.status)}>
@@ -83,9 +86,12 @@ function ToyDetailContent({
   return (
     <div className="detail-content">
       <div className="detail-title">
-        <div>
-          <span className="detail-id">{detail.toy_id}</span>
-          <h3>{detail.toy_name}</h3>
+        <div className="detail-identity">
+          <EntityIcon type="toy" />
+          <div>
+            <span className="detail-id">{detail.toy_id}</span>
+            <h3>{detail.toy_name}</h3>
+          </div>
         </div>
       </div>
       <p className="detail-reason">{detail.reason}</p>
@@ -98,9 +104,12 @@ function ToyDetailContent({
           {detail.parts.map((part) => (
             <details className="part-card" key={part.part_id}>
               <summary className="part-summary">
-                <div>
-                  <span className="detail-id">{part.part_id}</span>
-                  <h4>{part.part_name}</h4>
+                <div className="part-identity">
+                  <EntityIcon type="part" />
+                  <div>
+                    <span className="detail-id">{part.part_id}</span>
+                    <h4>{part.part_name}</h4>
+                  </div>
                 </div>
                 <div className="part-meta">
                   <span className="quantity">Qty {part.quantity}</span>
@@ -111,7 +120,6 @@ function ToyDetailContent({
               </summary>
               <div className="part-detail">
                 <p className="part-reason">
-                  <span>{part.reason_code}</span>
                   {part.reason}
                 </p>
                 {part.paths.length === 0 ? (
@@ -151,10 +159,13 @@ function PathCard({ path, updating, onSupplierFlag }: PathCardProps) {
   return (
     <div className={`path-card ${path.supplier_flagged ? "is-flagged" : ""}`}>
       <div className="path-topline">
-        <div>
-          <span className="path-kicker">SUPPLIER</span>
-          <strong>{path.supplier_name}</strong>
-          <span className="detail-id">{path.supplier_id}</span>
+        <div className="path-identity">
+          <EntityIcon type="supplier" />
+          <div>
+            <span className="path-kicker">SUPPLIER</span>
+            <strong>{path.supplier_name}</strong>
+            <span className="detail-id">{path.supplier_id}</span>
+          </div>
         </div>
         <button
           className={`risk-button ${path.supplier_flagged ? "is-flagged" : ""}`}
@@ -177,7 +188,10 @@ function PathCard({ path, updating, onSupplierFlag }: PathCardProps) {
       </div>
       <div className="path-facts">
         <span>
-          <small>Factory</small>
+          <span className="path-fact-label">
+            <EntityIcon type="factory" />
+            <small>Factory</small>
+          </span>
           {path.factory_name} <em>{path.factory_id}</em>
         </span>
         <span>

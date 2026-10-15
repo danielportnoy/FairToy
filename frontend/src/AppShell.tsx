@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 
 import type { Supplier } from "./api";
 import { FinisherSidebar } from "./components/FinisherSidebar";
-import { SelectionRequired } from "./components/Shared";
+import { SelectionRequired, TraceMark } from "./components/Shared";
 import { SupplierWorkspace } from "./components/SupplierWorkspace";
 import { ToyInvestigation } from "./components/ToyInvestigation";
 import { ToysWorkspace } from "./components/ToysWorkspace";
@@ -72,7 +72,7 @@ function AppShell() {
           </p>
         </div>
         <div className="header-mark" aria-hidden="true">
-          <span>FT</span>
+          <TraceMark />
         </div>
       </header>
 

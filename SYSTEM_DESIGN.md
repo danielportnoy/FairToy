@@ -2,8 +2,8 @@
 
 ## Document status
 
-**Status:** Draft
-**Phase:** System design
+**Status:** Current design
+**Phase:** Implemented MVP
 **Source of truth:** [`SPEC.md`](SPEC.md) defines product behavior and
 domain semantics. This document defines the technical design that implements
 that behavior.
@@ -303,21 +303,13 @@ end-to-end workflow. A full browser automation suite is deferred.
 - A future materialized impact projection may be introduced if high-fanout
   reads become a bottleneck.
 
-## Remaining system-design questions
+## Design status
 
-1. What foreign keys, check constraints, and nullability rules should the
-   accepted canonical tables use?
-2. What repository queries provide the facts needed by impact analysis?
-3. What API contract supports the dashboard, traceability detail, and
-   idempotent Supplier flagging?
-4. What tests verify importer integrity, impact classification, and the
-   end-to-end flag flow?
-
-The frontend information architecture is resolved by D036, D042, and D043;
-exact route mechanics remain an implementation detail. The MVP scale boundary
-is resolved by D038 and D043; a future projection or server-side pagination
-strategy should be introduced only when observed fan-out, payload size, or
-latency justifies it.
+The schema, importer, repository boundaries, API contract, impact service,
+and frontend information architecture are resolved and implemented. Exact
+client-side route mechanics remain an implementation detail. The MVP scale
+boundary is documented in D038: add server-side pagination or an impact
+projection only when observed fan-out, payload size, or latency justifies it.
 
 ## Deferred production extensions
 

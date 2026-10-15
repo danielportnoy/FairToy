@@ -9,7 +9,7 @@ import {
   TOYS_PER_PAGE,
   type ToyStatusFilter,
 } from "../view-model";
-import { EmptyNotice, ErrorNotice } from "./Shared";
+import { EmptyNotice, EntityIcon, ErrorNotice } from "./Shared";
 
 interface ToysWorkspaceProps {
   finisherId: string;
@@ -50,13 +50,16 @@ export function ToysWorkspace({
   return (
     <section aria-labelledby="toys-title">
       <div className="view-heading">
-        <div>
-          <p className="eyebrow">TOY CATALOG</p>
-          <h2 id="toys-title">Toys</h2>
-          <p className="view-description">
-            Search the selected Finisher&apos;s Toys, filter by current impact
-            status, and open a Toy investigation for evidence.
-          </p>
+        <div className="heading-with-icon">
+          <EntityIcon type="toy" />
+          <div>
+            <p className="eyebrow">TOY CATALOG</p>
+            <h2 id="toys-title">Toys</h2>
+            <p className="view-description">
+              Search the selected Finisher&apos;s Toys, filter by current impact
+              status, and open a Toy investigation for evidence.
+            </p>
+          </div>
         </div>
         <span className="record-count">{filteredToys.length}</span>
       </div>
@@ -148,10 +151,13 @@ function ToyQueue({
           type="button"
           onClick={() => onSelect(toy.toy_id)}
         >
-          <span className="toy-row-copy">
-            <strong>{toy.toy_name}</strong>
-            <span>
-              {toy.toy_id} · {toy.reason}
+          <span className="toy-row-leading">
+            <EntityIcon type="toy" />
+            <span className="toy-row-copy">
+              <strong>{toy.toy_name}</strong>
+              <span>
+                {toy.toy_id} · {toy.reason}
+              </span>
             </span>
           </span>
           <span className={statusClass(toy.status)}>
