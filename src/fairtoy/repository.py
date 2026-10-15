@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import select
@@ -103,6 +103,40 @@ class TraceabilityRepository:
                 flagged_at=row.flagged_at,
             )
             for row in rows
+        )
+
+    def update_supplier_flag(
+        self,
+        *,
+        supplier_id: str,
+        child_labor_flagged: bool,
+        now: datetime | None = None,
+    ) -> SupplierSummary | None:
+        """Set a Supplier's desired flag state and preserve its transition time."""
+
+        self._validate_identifier(supplier_id, "supplier_id")
+        if not isinstance(child_labor_flagged, bool):
+            raise ValueError("child_labor_flagged must be a boolean")
+
+        supplier = self._session.get(Supplier, supplier_id)
+        if supplier is None:
+            return None
+
+        if child_labor_flagged:
+            if not supplier.child_labor_flagged or supplier.flagged_at is None:
+                supplier.flagged_at = now or datetime.now(timezone.utc)
+            supplier.child_labor_flagged = True
+        else:
+            supplier.child_labor_flagged = False
+            supplier.flagged_at = None
+
+        self._session.flush()
+        return SupplierSummary(
+            supplier_id=supplier.supplier_id,
+            supplier_name=supplier.supplier_name,
+            hq_country=supplier.hq_country,
+            child_labor_flagged=supplier.child_labor_flagged,
+            flagged_at=supplier.flagged_at,
         )
 
     def list_toy_traceability(

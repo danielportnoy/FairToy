@@ -177,6 +177,27 @@ full conversation.
 - **Explicit deferral:** Supplier mutation, frontend work, and unrelated
   refactoring remain out of scope.
 
+## 2026-10-15 — Supplier risk mutation / Slice 5
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add an explicit `PATCH /api/suppliers/{supplier_id}` operation
+  accepting the desired `child_labor_flagged` state.
+- **State transition:** flagging records a UTC `flagged_at` timestamp,
+  repeated identical flag requests preserve that timestamp, and unflagging
+  clears it. The database invariant remains enforced.
+- **Transaction boundary:** the API commits the repository update explicitly,
+  rolls back on SQLAlchemy errors, and returns `404` for an unknown Supplier.
+- **Request contract:** Pydantic uses strict boolean validation and rejects
+  unknown PATCH body fields before the repository is called.
+- **Workflow behavior:** the next Toy detail read reflects the updated global
+  Supplier flag through the existing impact calculation.
+- **Verification:** focused API tests passed (`15 passed`) and the full suite
+  passed (`36 passed`), covering explicit flagging, strict request validation,
+  idempotent repeats, unflagging, recalculation, and not-found behavior.
+- **Explicit deferral:** frontend work, generic CRUD, authentication, and
+  unrelated persistence changes remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

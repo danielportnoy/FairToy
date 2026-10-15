@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, StrictBool
 
 from .impact import ImpactReasonCode
 
@@ -27,6 +27,12 @@ class SupplierResponse(BaseModel):
     hq_country: str | None
     child_labor_flagged: bool
     flagged_at: datetime | None
+
+
+class SupplierFlagUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    child_labor_flagged: StrictBool
 
 
 class ImpactPathResponse(BaseModel):

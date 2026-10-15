@@ -7,9 +7,9 @@ labor.
 
 ## Status
 
-The foundation, impact-analysis service, repository boundary, and read-only
-API are implemented. The frontend and Supplier flag mutation remain deferred
-to later slices. The implementation follows the decisions in
+The foundation, impact-analysis service, repository boundary, and API are
+implemented. The frontend remains deferred to a later slice. The
+implementation follows the decisions in
 [`SPEC.md`](SPEC.md).
 
 ## Current scope
@@ -83,7 +83,7 @@ flags. To intentionally recreate the database from the fixtures:
 fairtoy reset
 ```
 
-## Read-only API
+## API
 
 Start the API after setting up the local database:
 
@@ -100,6 +100,7 @@ GET /api/finishers
 GET /api/toys?finisher_id=FIN-001
 GET /api/toys/{toy_id}?finisher_id=FIN-001
 GET /api/suppliers
+PATCH /api/suppliers/{supplier_id}
 ```
 
 For example:
@@ -108,5 +109,10 @@ For example:
 curl 'http://127.0.0.1:8000/api/toys?finisher_id=FIN-001'
 ```
 
-Supplier flag and unflag mutation, plus the frontend, are intentionally
-separate follow-up slices.
+The PATCH body is an explicit desired state:
+
+```json
+{"child_labor_flagged": true}
+```
+
+The frontend remains a separate follow-up slice.

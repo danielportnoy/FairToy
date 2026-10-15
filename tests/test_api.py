@@ -136,3 +136,104 @@ def test_blank_finisher_identifier_is_rejected(
 
     assert response.status_code == 422
     assert response.json()["detail"] == "finisher_id is required"
+
+
+def test_supplier_flag_update_is_explicit_idempotent_and_recalculates(
+    client: TestClient,
+) -> None:
+    detail_response = client.get(
+        "/api/toys/TOY-0275",
+        params={"finisher_id": "FIN-003"},
+    )
+    path = detail_response.json()["parts"][0]["paths"][0]
+    supplier_id = path["supplier_id"]
+
+    flagged_response = client.patch(
+        f"/api/suppliers/{supplier_id}",
+        json={"child_labor_flagged": True},
+    )
+    assert flagged_response.status_code == 200
+    flagged_supplier = flagged_response.json()
+    assert flagged_supplier["child_labor_flagged"] is True
+    assert flagged_supplier["flagged_at"]
+    first_flagged_at = flagged_supplier["flagged_at"]
+
+    repeated_response = client.patch(
+        f"/api/suppliers/{supplier_id}",
+        json={"child_labor_flagged": True},
+    )
+    assert repeated_response.status_code == 200
+    assert repeated_response.json()["flagged_at"] == first_flagged_at
+
+    flagged_detail = client.get(
+        "/api/toys/TOY-0275",
+        params={"finisher_id": "FIN-003"},
+    ).json()
+    flagged_paths = [
+        candidate_path
+        for part in flagged_detail["parts"]
+        for candidate_path in part["paths"]
+        if candidate_path["supplier_id"] == supplier_id
+    ]
+    assert flagged_paths
+    assert all(candidate_path["supplier_flagged"] for candidate_path in flagged_paths)
+
+    unflagged_response = client.patch(
+        f"/api/suppliers/{supplier_id}",
+        json={"child_labor_flagged": False},
+    )
+    assert unflagged_response.status_code == 200
+    assert unflagged_response.json()["child_labor_flagged"] is False
+    assert unflagged_response.json()["flagged_at"] is None
+
+    unflagged_detail = client.get(
+        "/api/toys/TOY-0275",
+        params={"finisher_id": "FIN-003"},
+    ).json()
+    unflagged_paths = [
+        candidate_path
+        for part in unflagged_detail["parts"]
+        for candidate_path in part["paths"]
+        if candidate_path["supplier_id"] == supplier_id
+    ]
+    assert unflagged_paths
+    assert all(not candidate_path["supplier_flagged"] for candidate_path in unflagged_paths)
+
+
+def test_unknown_supplier_flag_update_returns_not_found(
+    client: TestClient,
+) -> None:
+    response = client.patch(
+        "/api/suppliers/SUP-UNKNOWN",
+        json={"child_labor_flagged": True},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Supplier not found"
+
+
+@pytest.mark.parametrize("value", [1, 0, "true", "false", "yes", None])
+def test_supplier_flag_update_rejects_non_boolean_values(
+    client: TestClient,
+    value: object,
+) -> None:
+    response = client.patch(
+        "/api/suppliers/SUP-001",
+        json={"child_labor_flagged": value},
+    )
+
+    assert response.status_code == 422
+
+
+def test_supplier_flag_update_rejects_unknown_fields(
+    client: TestClient,
+) -> None:
+    response = client.patch(
+        "/api/suppliers/SUP-001",
+        json={
+            "child_labor_flagged": True,
+            "unexpected": "rejected",
+        },
+    )
+
+    assert response.status_code == 422

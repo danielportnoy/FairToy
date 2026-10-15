@@ -2,16 +2,19 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
 from .api_schemas import (
     FinisherResponse,
     PartImpactResponse,
     SupplierResponse,
+    SupplierFlagUpdateRequest,
     ToyDetailResponse,
     ToySummaryResponse,
     ImpactPathResponse,
@@ -25,7 +28,7 @@ from .impact import (
     calculate_toy_impact,
     calculate_toy_impacts,
 )
-from .repository import TraceabilityRepository
+from .repository import SupplierSummary, TraceabilityRepository
 
 
 def create_app(
@@ -68,16 +71,36 @@ def create_app(
         session: Session = Depends(get_session),
     ) -> list[SupplierResponse]:
         repository = TraceabilityRepository(session)
-        return [
-            SupplierResponse(
-                supplier_id=supplier.supplier_id,
-                supplier_name=supplier.supplier_name,
-                hq_country=supplier.hq_country,
-                child_labor_flagged=supplier.child_labor_flagged,
-                flagged_at=supplier.flagged_at,
-            )
-            for supplier in repository.list_suppliers()
-        ]
+        return [_supplier_response(supplier) for supplier in repository.list_suppliers()]
+
+    @app.patch(
+        "/api/suppliers/{supplier_id}",
+        response_model=SupplierResponse,
+    )
+    def update_supplier_flag(
+        supplier_id: str,
+        payload: SupplierFlagUpdateRequest,
+        session: Session = Depends(get_session),
+    ) -> SupplierResponse:
+        _require_identifier(supplier_id, "supplier_id")
+        repository = TraceabilityRepository(session)
+        try:
+            with session.begin():
+                supplier = repository.update_supplier_flag(
+                    supplier_id=supplier_id,
+                    child_labor_flagged=payload.child_labor_flagged,
+                    now=datetime.now(timezone.utc),
+                )
+        except SQLAlchemyError as exc:
+            session.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail="Supplier flag update failed",
+            ) from exc
+
+        if supplier is None:
+            raise HTTPException(status_code=404, detail="Supplier not found")
+        return _supplier_response(supplier)
 
     @app.get("/api/toys", response_model=list[ToySummaryResponse])
     def list_toys(
@@ -144,6 +167,24 @@ def _require_identifier(value: str, field_name: str) -> None:
             status_code=422,
             detail=f"{field_name} is required",
         )
+
+
+def _supplier_response(supplier: SupplierSummary) -> SupplierResponse:
+    return SupplierResponse(
+        supplier_id=supplier.supplier_id,
+        supplier_name=supplier.supplier_name,
+        hq_country=supplier.hq_country,
+        child_labor_flagged=supplier.child_labor_flagged,
+        flagged_at=_as_utc(supplier.flagged_at),
+    )
+
+
+def _as_utc(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
 
 
 def _summary_response(
