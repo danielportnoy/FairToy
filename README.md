@@ -7,9 +7,10 @@ labor.
 
 ## Status
 
-Slice 1 foundation is implemented; the API and frontend remain deferred until
-the foundation is reviewed and accepted. The implementation follows the
-decisions in [`SPEC.md`](SPEC.md).
+The foundation, impact-analysis service, repository boundary, and read-only
+API are implemented. The frontend and Supplier flag mutation remain deferred
+to later slices. The implementation follows the decisions in
+[`SPEC.md`](SPEC.md).
 
 ## Current scope
 
@@ -49,10 +50,10 @@ copied into this repository under `data/` so a fresh checkout can be seeded
 reproducibly. macOS metadata under `__MACOSX/` is not part of the application
 data.
 
-Slice 1 local database setup is documented below. API and frontend run
-instructions will be added with their respective implementation slices.
+Local database setup and API run instructions are documented below. The
+frontend remains deferred.
 
-## Slice 1: local database setup
+## Local database setup
 
 The foundation slice uses Python, SQLAlchemy, and a file-backed SQLite
 database. The importer reads the six CSV fixtures from `data/` and writes
@@ -82,4 +83,30 @@ flags. To intentionally recreate the database from the fixtures:
 fairtoy reset
 ```
 
-The API and frontend are not implemented in this slice.
+## Read-only API
+
+Start the API after setting up the local database:
+
+```bash
+fairtoy setup
+uvicorn fairtoy.api:app --reload
+```
+
+FastAPI's interactive documentation is available at
+<http://127.0.0.1:8000/docs>. The current read-only endpoints are:
+
+```text
+GET /api/finishers
+GET /api/toys?finisher_id=FIN-001
+GET /api/toys/{toy_id}?finisher_id=FIN-001
+GET /api/suppliers
+```
+
+For example:
+
+```bash
+curl 'http://127.0.0.1:8000/api/toys?finisher_id=FIN-001'
+```
+
+Supplier flag and unflag mutation, plus the frontend, are intentionally
+separate follow-up slices.

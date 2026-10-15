@@ -224,6 +224,14 @@ Toy should return its complete parts, quantities, possible sources, Supplier
 flags, Factories, and explanation paths. The frontend loads detail only when a
 user opens a Toy.
 
+The measured detail response for a Toy with many Parts is approximately
+16.5 KB, which is acceptable for an on-demand read. Keep the detail response
+explainable but avoid repeating Toy and Part fields inside every path when
+those fields are already present on their parent objects. Include stable
+reason codes alongside human-readable reasons. Serialize monetary values
+consistently, with decimal strings acceptable when preserving currency
+precision.
+
 React presents one focused Finisher dashboard with a Finisher selector,
 impact summary, filterable Toy list, selected-Toy detail, and contextual
 Supplier flag controls. It must represent loading, empty, error, and
@@ -234,8 +242,8 @@ browser's native `fetch`. After a Supplier mutation, the dashboard will
 refetch the relevant summaries and detail rather than maintain a second
 client-side impact calculation.
 
-Exact endpoints, response schemas, and frontend route mechanics are still
-open.
+Exact field names and frontend route mechanics remain implementation details;
+the summary/detail and explainability contract above is accepted.
 
 ### Verification strategy
 

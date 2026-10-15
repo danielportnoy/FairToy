@@ -11,9 +11,35 @@ ImpactStatus = Literal[
     "affected",
 ]
 
+ImpactReasonCode = Literal[
+    "toy_unaffected",
+    "toy_potentially_affected",
+    "toy_affected",
+    "part_no_known_sources",
+    "part_no_flagged_sources",
+    "part_all_sources_flagged",
+    "part_mixed_source_flags",
+]
+
 UNAFFECTED: ImpactStatus = "unaffected"
 POTENTIALLY_AFFECTED: ImpactStatus = "potentially_affected"
 AFFECTED: ImpactStatus = "affected"
+
+TOY_UNAFFECTED_REASON_CODE: ImpactReasonCode = "toy_unaffected"
+TOY_POTENTIALLY_AFFECTED_REASON_CODE: ImpactReasonCode = (
+    "toy_potentially_affected"
+)
+TOY_AFFECTED_REASON_CODE: ImpactReasonCode = "toy_affected"
+PART_NO_KNOWN_SOURCES_REASON_CODE: ImpactReasonCode = "part_no_known_sources"
+PART_NO_FLAGGED_SOURCES_REASON_CODE: ImpactReasonCode = (
+    "part_no_flagged_sources"
+)
+PART_ALL_SOURCES_FLAGGED_REASON_CODE: ImpactReasonCode = (
+    "part_all_sources_flagged"
+)
+PART_MIXED_SOURCE_FLAGS_REASON_CODE: ImpactReasonCode = (
+    "part_mixed_source_flags"
+)
 
 
 class ImpactInputError(ValueError):
@@ -80,6 +106,7 @@ class PartImpact:
     part_name: str
     quantity: int
     status: ImpactStatus
+    reason_code: ImpactReasonCode
     reason: str
     paths: tuple[ImpactPath, ...]
 
@@ -89,6 +116,7 @@ class ToyImpact:
     toy_id: str
     toy_name: str
     status: ImpactStatus
+    reason_code: ImpactReasonCode
     reason: str
     parts: tuple[PartImpact, ...]
 
@@ -97,6 +125,7 @@ __all__ = [
     "AFFECTED",
     "POTENTIALLY_AFFECTED",
     "UNAFFECTED",
+    "ImpactReasonCode",
     "ImpactInputError",
     "ImpactPath",
     "ImpactStatus",

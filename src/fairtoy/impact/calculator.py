@@ -8,8 +8,11 @@ from .contracts import (
     ImpactInputError,
     ImpactPath,
     PartImpact,
+    ToyTraceability,
     ToyImpact,
     TraceabilityFact,
+    TOY_UNAFFECTED_REASON_CODE,
+    UNAFFECTED,
 )
 from .validation import (
     ConsistencyRegistry,
@@ -46,6 +49,40 @@ def calculate_impact(
         _add_fact(grouped, identity, fact.quantity, path)
 
     return _build_results(grouped, registry)
+
+
+def calculate_toy_impact(toy: ToyTraceability) -> ToyImpact:
+    """Classify one Finisher-scoped Toy while preserving empty Toys."""
+
+    if not toy.facts:
+        return ToyImpact(
+            toy_id=toy.toy_id,
+            toy_name=toy.toy_name,
+            status=UNAFFECTED,
+            reason_code=TOY_UNAFFECTED_REASON_CODE,
+            reason="No required part is affected or potentially affected.",
+            parts=(),
+        )
+
+    results = calculate_impact(toy.facts)
+    if len(results) != 1:
+        raise ImpactInputError(
+            f"facts for toy {toy.toy_id!r} produced {len(results)} Toys"
+        )
+    result = results[0]
+    if result.toy_id != toy.toy_id or result.toy_name != toy.toy_name:
+        raise ImpactInputError(
+            f"facts do not match ToyTraceability {toy.toy_id!r}"
+        )
+    return result
+
+
+def calculate_toy_impacts(
+    toys: Iterable[ToyTraceability],
+) -> tuple[ToyImpact, ...]:
+    """Classify a deterministic sequence of Finisher-scoped Toys."""
+
+    return tuple(calculate_toy_impact(toy) for toy in toys)
 
 
 def _add_fact(
@@ -129,12 +166,13 @@ def _build_results(
             _build_part_impact(part_id, grouped[toy_id][part_id])
             for part_id in sorted(grouped[toy_id])
         )
-        toy_status, toy_reason = classify_toy(parts=parts)
+        toy_status, toy_reason_code, toy_reason = classify_toy(parts=parts)
         results.append(
             ToyImpact(
                 toy_id=toy_id,
                 toy_name=registry.toy_names[toy_id],
                 status=toy_status,
+                reason_code=toy_reason_code,
                 reason=toy_reason,
                 parts=parts,
             )

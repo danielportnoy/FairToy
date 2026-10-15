@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy import select
@@ -9,6 +10,7 @@ from sqlalchemy.orm import Session
 from .impact import ToyTraceability, TraceabilityFact
 from .models import (
     Factory,
+    Finisher,
     FinisherToy,
     Part,
     PartSource,
@@ -16,6 +18,22 @@ from .models import (
     Toy,
     ToyPart,
 )
+
+
+@dataclass(frozen=True)
+class FinisherSummary:
+    finisher_id: str
+    finisher_name: str
+    hq_country: str | None
+
+
+@dataclass(frozen=True)
+class SupplierSummary:
+    supplier_id: str
+    supplier_name: str
+    hq_country: str | None
+    child_labor_flagged: bool
+    flagged_at: datetime | None
 
 
 @dataclass
@@ -31,6 +49,61 @@ class TraceabilityRepository:
 
     def __init__(self, session: Session) -> None:
         self._session = session
+
+    def list_finishers(self) -> tuple[FinisherSummary, ...]:
+        rows = self._session.execute(
+            select(
+                Finisher.finisher_id,
+                Finisher.finisher_name,
+                Finisher.hq_country,
+            ).order_by(Finisher.finisher_id)
+        ).all()
+        return tuple(
+            FinisherSummary(
+                finisher_id=row.finisher_id,
+                finisher_name=row.finisher_name,
+                hq_country=row.hq_country,
+            )
+            for row in rows
+        )
+
+    def get_finisher(self, finisher_id: str) -> FinisherSummary | None:
+        self._validate_identifier(finisher_id, "finisher_id")
+        result = self._session.execute(
+            select(
+                Finisher.finisher_id,
+                Finisher.finisher_name,
+                Finisher.hq_country,
+            ).where(Finisher.finisher_id == finisher_id)
+        ).first()
+        if result is None:
+            return None
+        return FinisherSummary(
+            finisher_id=result.finisher_id,
+            finisher_name=result.finisher_name,
+            hq_country=result.hq_country,
+        )
+
+    def list_suppliers(self) -> tuple[SupplierSummary, ...]:
+        rows = self._session.execute(
+            select(
+                Supplier.supplier_id,
+                Supplier.supplier_name,
+                Supplier.hq_country,
+                Supplier.child_labor_flagged,
+                Supplier.flagged_at,
+            ).order_by(Supplier.supplier_id)
+        ).all()
+        return tuple(
+            SupplierSummary(
+                supplier_id=row.supplier_id,
+                supplier_name=row.supplier_name,
+                hq_country=row.hq_country,
+                child_labor_flagged=row.child_labor_flagged,
+                flagged_at=row.flagged_at,
+            )
+            for row in rows
+        )
 
     def list_toy_traceability(
         self,

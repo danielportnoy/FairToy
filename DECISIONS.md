@@ -379,3 +379,19 @@ not a transcript of the planning conversation.
   explain.
 - **Future:** Add a server-state library if the application grows to many
   screens, shared queries, or complex cache invalidation.
+
+## D035 — Keep detail payloads explainable but compact
+
+- **Status:** Accepted
+- **Decision:** Keep full traceability paths on the Toy detail response, but
+  keep the Toy summary response compact. Path objects should not repeat Toy and
+  Part fields already present in their parent objects.
+- **Rationale:** The measured detail response is approximately 16.5 KB for a
+  Toy with many Parts, which is acceptable for an on-demand detail read. The
+  response still benefits from avoiding redundant JSON.
+- **Contract guidance:** Include a stable `reason_code` alongside the
+  human-readable reason. Serialize `unit_cost_usd` consistently; decimal
+  strings are acceptable when preserving currency precision.
+- **Trade-off:** The detail representation is richer than a minimal resource
+  response, but it directly satisfies the traceability requirement. Summary
+  reads must not include the full path graph.

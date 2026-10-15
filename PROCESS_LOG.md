@@ -128,6 +128,55 @@ full conversation.
 - **Review gate:** do not begin API or frontend integration until this
   repository boundary is reviewed and accepted.
 
+## 2026-10-15 — Read-only API / Slice 4
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add a small FastAPI application factory and workflow-oriented
+  read endpoints for Finishers, Finisher-filtered Toy summaries and details,
+  and Suppliers.
+- **Boundary behavior:** create one synchronous SQLAlchemy session per
+  request, map repository contracts to typed response schemas, calculate
+  impact on read, and return a clear not-found response when a Toy is outside
+  the selected Finisher catalog.
+- **Verification:** API integration tests use a temporary imported SQLite
+  database and cover list responses, derived impact summaries, explainable
+  detail paths, and Finisher catalog scoping.
+- **Explicit deferral:** Supplier flag/unflag mutation and the frontend remain
+  separate slices; this change does not add generic CRUD or authentication.
+- **Review gate:** review the read-only API contract before implementing
+  Supplier mutation or the frontend.
+
+## 2026-10-15 — Detail response contract review
+
+- **Phase:** User workflow
+- **Status:** Accepted refinement; implementation follow-up required
+- **Observation:** The real Toy detail response is approximately 16.5 KB for
+  a Toy with many Parts, which is acceptable for an on-demand detail read.
+- **Decision:** Keep full paths on detail responses, keep summary responses
+  compact, remove redundant parent identifiers from path objects where
+  practical, and add stable reason codes alongside human-readable reasons.
+- **Serialization:** Keep monetary values consistent; decimal strings are
+  acceptable when preserving currency precision.
+
+## 2026-10-15 — API response contract / D035
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add stable reason codes to Toy and Part impact responses, keep
+  summary responses compact, and remove redundant Toy and Part fields from
+  nested detail paths.
+- **Serialization:** Detail path `unit_cost_usd` values are emitted as
+  decimal strings or null, preserving the domain value without float
+  conversion.
+- **Compatibility:** Existing endpoints, Finisher validation, catalog
+  scoping, deterministic ordering, and impact semantics are unchanged.
+- **Verification:** focused API tests passed (`6 passed`); full suite passed
+  (`27 passed`). The environment reports nine third-party Python 3.14
+  deprecation warnings from FastAPI/Starlette.
+- **Explicit deferral:** Supplier mutation, frontend work, and unrelated
+  refactoring remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

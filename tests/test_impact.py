@@ -56,7 +56,9 @@ def test_unflagged_source_is_unaffected_and_explainable() -> None:
     result = calculate_impact([source_fact()])
 
     assert result[0].status == UNAFFECTED
+    assert result[0].reason_code == "toy_unaffected"
     assert result[0].parts[0].status == UNAFFECTED
+    assert result[0].parts[0].reason_code == "part_no_flagged_sources"
     assert result[0].parts[0].quantity == 2
     assert len(result[0].parts[0].paths) == 1
     assert result[0].parts[0].paths[0].supplier_flagged is False
@@ -66,7 +68,9 @@ def test_part_with_no_known_sources_is_unaffected() -> None:
     result = calculate_impact([no_source_fact()])
 
     assert result[0].status == UNAFFECTED
+    assert result[0].reason_code == "toy_unaffected"
     assert result[0].parts[0].status == UNAFFECTED
+    assert result[0].parts[0].reason_code == "part_no_known_sources"
     assert result[0].parts[0].paths == ()
     assert "No known possible sources" in result[0].parts[0].reason
 
@@ -89,7 +93,9 @@ def test_mixed_sources_are_potentially_affected() -> None:
 
     part = result[0].parts[0]
     assert result[0].status == POTENTIALLY_AFFECTED
+    assert result[0].reason_code == "toy_potentially_affected"
     assert part.status == POTENTIALLY_AFFECTED
+    assert part.reason_code == "part_mixed_source_flags"
     assert [path.factory_id for path in part.paths] == ["FAC-1", "FAC-2"]
 
 
@@ -110,7 +116,9 @@ def test_all_known_sources_are_affected() -> None:
     )
 
     assert result[0].status == AFFECTED
+    assert result[0].reason_code == "toy_affected"
     assert result[0].parts[0].status == AFFECTED
+    assert result[0].parts[0].reason_code == "part_all_sources_flagged"
 
 
 def test_affected_toy_status_takes_precedence_over_potential() -> None:
