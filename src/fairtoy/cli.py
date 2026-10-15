@@ -13,7 +13,7 @@ from .db import (
     create_session_factory,
     drop_schema,
 )
-from .importer import ImportValidationError, ImportSummary, import_fixtures
+from .importer import ImportSummary, ImportValidationError, import_fixtures
 
 
 def _add_location_arguments(parser: argparse.ArgumentParser) -> None:

@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 DEFAULT_DATABASE_PATH = DEFAULT_DATA_DIR / "generated" / "fairtoy.sqlite3"

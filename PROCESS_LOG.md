@@ -198,6 +198,19 @@ full conversation.
 - **Explicit deferral:** frontend work, generic CRUD, authentication, and
   unrelated persistence changes remain out of scope.
 
+## 2026-10-15 — Quality gates / Slice 6
+
+- **Phase:** Verification
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add focused Ruff lint/format checks, mypy type checking, and
+  documented local commands alongside the existing pytest suite.
+- **Boundary:** no deployment, CI service, runtime feature, or infrastructure
+  was added.
+- **Verification:** Ruff lint and format checks passed, mypy reported no
+  issues in 14 source files, and the full test suite passed (`36 passed`).
+  Compilation and diff-whitespace checks also passed. The test environment
+  still reports 11 third-party Python 3.14 deprecation warnings.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

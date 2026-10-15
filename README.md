@@ -66,7 +66,10 @@ dependencies, then run the tests:
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
-pytest
+pytest -q
+ruff check src tests
+ruff format --check src tests
+mypy src/fairtoy
 ```
 
 Create or update the local database with the fixtures:
@@ -93,7 +96,7 @@ uvicorn fairtoy.api:app --reload
 ```
 
 FastAPI's interactive documentation is available at
-<http://127.0.0.1:8000/docs>. The current read-only endpoints are:
+<http://127.0.0.1:8000/docs>. The current workflow endpoints are:
 
 ```text
 GET /api/finishers

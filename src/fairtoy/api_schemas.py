@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, StrictBool
 
 from .impact import ImpactReasonCode
 
-
 ImpactStatusValue = Literal[
     "unaffected",
     "potentially_affected",

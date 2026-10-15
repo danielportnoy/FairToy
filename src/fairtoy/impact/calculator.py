@@ -5,14 +5,14 @@ from typing import Iterable
 
 from .classification import classify_part, classify_toy
 from .contracts import (
+    TOY_UNAFFECTED_REASON_CODE,
+    UNAFFECTED,
     ImpactInputError,
     ImpactPath,
     PartImpact,
-    ToyTraceability,
     ToyImpact,
+    ToyTraceability,
     TraceabilityFact,
-    TOY_UNAFFECTED_REASON_CODE,
-    UNAFFECTED,
 )
 from .validation import (
     ConsistencyRegistry,
@@ -71,9 +71,7 @@ def calculate_toy_impact(toy: ToyTraceability) -> ToyImpact:
         )
     result = results[0]
     if result.toy_id != toy.toy_id or result.toy_name != toy.toy_name:
-        raise ImpactInputError(
-            f"facts do not match ToyTraceability {toy.toy_id!r}"
-        )
+        raise ImpactInputError(f"facts do not match ToyTraceability {toy.toy_id!r}")
     return result
 
 
@@ -115,9 +113,7 @@ def _validate_existing_part(
     quantity: int,
 ) -> None:
     if part_group.part_name != identity.part_name:
-        raise ImpactInputError(
-            f"part_id {identity.part_id!r} has conflicting names"
-        )
+        raise ImpactInputError(f"part_id {identity.part_id!r} has conflicting names")
     if part_group.quantity != quantity:
         raise ImpactInputError(
             f"ToyPart {(identity.toy_id, identity.part_id)!r} "
@@ -150,8 +146,7 @@ def _add_source_fact(
     existing_path = part_group.paths_by_factory.get(path.factory_id)
     if existing_path is not None and existing_path != path:
         raise ImpactInputError(
-            f"source {(identity.part_id, path.factory_id)!r} "
-            "has conflicting facts"
+            f"source {(identity.part_id, path.factory_id)!r} has conflicting facts"
         )
     part_group.paths_by_factory[path.factory_id] = path
 

@@ -175,9 +175,7 @@ def _read_rows(
     try:
         handle = path.open("r", encoding="utf-8-sig", newline="")
     except FileNotFoundError as exc:
-        raise ImportValidationError(
-            f"Missing required fixture file: {path}"
-        ) from exc
+        raise ImportValidationError(f"Missing required fixture file: {path}") from exc
 
     with handle:
         reader = csv.DictReader(handle)
@@ -196,9 +194,7 @@ def _read_rows(
                     f"{path}:{line_number}: too many CSV values"
                 )
             if any(value is None for value in row.values()):
-                raise ImportValidationError(
-                    f"{path}:{line_number}: too few CSV values"
-                )
+                raise ImportValidationError(f"{path}:{line_number}: too few CSV values")
             if all(not value.strip() for value in row.values()):
                 continue
             yield line_number, row
@@ -217,9 +213,7 @@ def _required(
 ) -> str:
     value = row[field_name].strip()
     if not value:
-        raise ImportValidationError(
-            f"{path}:{line_number}: {field_name} is required"
-        )
+        raise ImportValidationError(f"{path}:{line_number}: {field_name} is required")
     return value
 
 
@@ -247,8 +241,7 @@ def _parse_decimal(
         value = Decimal(raw_value)
     except InvalidOperation as exc:
         raise ImportValidationError(
-            f"{path}:{line_number}: {field_name} must be a number, "
-            f"found {raw_value!r}"
+            f"{path}:{line_number}: {field_name} must be a number, found {raw_value!r}"
         ) from exc
     if not value.is_finite():
         raise ImportValidationError(
@@ -571,8 +564,7 @@ def _parse_bill_of_materials(path: Path) -> tuple[ToyPartRecord, ...]:
             records_by_key[key] = record
         elif existing_record != record:
             raise ImportValidationError(
-                f"{location}: ToyPart {key!r} conflicts with "
-                f"{existing_record.location}"
+                f"{location}: ToyPart {key!r} conflicts with {existing_record.location}"
             )
     return tuple(
         sorted(
@@ -606,65 +598,72 @@ def _unique_records(
 def _validate_references(source: SourceData) -> None:
     finisher_ids = {record.finisher_id for record in source.finishers}
     supplier_ids = {record.supplier_id for record in source.suppliers}
-    factory_by_id = {
-        record.factory_id: record for record in source.factories
-    }
+    factory_by_id = {record.factory_id: record for record in source.factories}
     toy_ids = {record.toy_id for record in source.toys}
     part_ids = {record.part_id for record in source.parts}
 
-    for record in source.factories:
-        if record.supplier_id not in supplier_ids:
+    for factory_record in source.factories:
+        if factory_record.supplier_id not in supplier_ids:
             raise ImportValidationError(
-                f"{record.location}: factory {record.factory_id!r} "
-                f"references missing supplier {record.supplier_id!r}"
+                f"{factory_record.location}: factory {factory_record.factory_id!r} "
+                f"references missing supplier {factory_record.supplier_id!r}"
             )
 
-    for record in source.finisher_toys:
-        if record.finisher_id not in finisher_ids:
+    for finisher_toy_record in source.finisher_toys:
+        if finisher_toy_record.finisher_id not in finisher_ids:
             raise ImportValidationError(
-                f"{record.location}: FinisherToy {record.finisher_id, record.toy_id!r} "
-                f"references missing finisher {record.finisher_id!r}"
+                f"{finisher_toy_record.location}: FinisherToy "
+                f"{finisher_toy_record.finisher_id, finisher_toy_record.toy_id!r} "
+                f"references missing finisher {finisher_toy_record.finisher_id!r}"
             )
-        if record.toy_id not in toy_ids:
+        if finisher_toy_record.toy_id not in toy_ids:
             raise ImportValidationError(
-                f"{record.location}: FinisherToy {record.finisher_id, record.toy_id!r} "
-                f"references missing toy {record.toy_id!r}"
+                f"{finisher_toy_record.location}: FinisherToy "
+                f"{finisher_toy_record.finisher_id, finisher_toy_record.toy_id!r} "
+                f"references missing toy {finisher_toy_record.toy_id!r}"
             )
 
-    for record in source.part_sources:
-        if record.part_id not in part_ids:
+    for part_source_record in source.part_sources:
+        if part_source_record.part_id not in part_ids:
             raise ImportValidationError(
-                f"{record.location}: PartSource {record.part_id, record.factory_id!r} "
-                f"references missing part {record.part_id!r}"
+                f"{part_source_record.location}: PartSource "
+                f"{part_source_record.part_id, part_source_record.factory_id!r} "
+                f"references missing part {part_source_record.part_id!r}"
             )
-        if record.supplier_id not in supplier_ids:
+        if part_source_record.supplier_id not in supplier_ids:
             raise ImportValidationError(
-                f"{record.location}: PartSource {record.part_id, record.factory_id!r} "
-                f"references missing supplier {record.supplier_id!r}"
+                f"{part_source_record.location}: PartSource "
+                f"{part_source_record.part_id, part_source_record.factory_id!r} "
+                f"references missing supplier {part_source_record.supplier_id!r}"
             )
-        factory = factory_by_id.get(record.factory_id)
+        factory = factory_by_id.get(part_source_record.factory_id)
         if factory is None:
             raise ImportValidationError(
-                f"{record.location}: PartSource {record.part_id, record.factory_id!r} "
-                f"references missing factory {record.factory_id!r}"
+                f"{part_source_record.location}: PartSource "
+                f"{part_source_record.part_id, part_source_record.factory_id!r} "
+                f"references missing factory {part_source_record.factory_id!r}"
             )
-        if factory.supplier_id != record.supplier_id:
+        if factory.supplier_id != part_source_record.supplier_id:
             raise ImportValidationError(
-                f"{record.location}: PartSource {record.part_id, record.factory_id!r} "
-                f"lists supplier {record.supplier_id!r}, but factory "
-                f"{record.factory_id!r} belongs to {factory.supplier_id!r}"
+                f"{part_source_record.location}: PartSource "
+                f"{part_source_record.part_id, part_source_record.factory_id!r} "
+                f"lists supplier {part_source_record.supplier_id!r}, but factory "
+                f"{part_source_record.factory_id!r} belongs to "
+                f"{factory.supplier_id!r}"
             )
 
-    for record in source.toy_parts:
-        if record.toy_id not in toy_ids:
+    for toy_part_record in source.toy_parts:
+        if toy_part_record.toy_id not in toy_ids:
             raise ImportValidationError(
-                f"{record.location}: ToyPart {record.toy_id, record.part_id!r} "
-                f"references missing toy {record.toy_id!r}"
+                f"{toy_part_record.location}: ToyPart "
+                f"{toy_part_record.toy_id, toy_part_record.part_id!r} "
+                f"references missing toy {toy_part_record.toy_id!r}"
             )
-        if record.part_id not in part_ids:
+        if toy_part_record.part_id not in part_ids:
             raise ImportValidationError(
-                f"{record.location}: ToyPart {record.toy_id, record.part_id!r} "
-                f"references missing part {record.part_id!r}"
+                f"{toy_part_record.location}: ToyPart "
+                f"{toy_part_record.toy_id, toy_part_record.part_id!r} "
+                f"references missing part {toy_part_record.part_id!r}"
             )
 
 
@@ -692,15 +691,9 @@ def read_source_data(data_dir: str | Path) -> SourceData:
     toy_parts = _parse_bill_of_materials(paths.bill_of_materials)
 
     source = SourceData(
-        finishers=tuple(
-            sorted(finishers, key=lambda record: record.finisher_id)
-        ),
-        suppliers=tuple(
-            sorted(suppliers, key=lambda record: record.supplier_id)
-        ),
-        factories=tuple(
-            sorted(factories, key=lambda record: record.factory_id)
-        ),
+        finishers=tuple(sorted(finishers, key=lambda record: record.finisher_id)),
+        suppliers=tuple(sorted(suppliers, key=lambda record: record.supplier_id)),
+        factories=tuple(sorted(factories, key=lambda record: record.factory_id)),
         toys=toys,
         finisher_toys=finisher_toys,
         parts=parts,
@@ -736,101 +729,104 @@ def import_fixtures(
     source = read_source_data(data_dir)
 
     with session.begin():
-        for record in source.finishers:
+        for finisher_record in source.finishers:
             _upsert(
                 session,
                 Finisher,
-                record.finisher_id,
+                finisher_record.finisher_id,
                 {
-                    "finisher_id": record.finisher_id,
-                    "finisher_name": record.finisher_name,
-                    "hq_country": record.hq_country,
+                    "finisher_id": finisher_record.finisher_id,
+                    "finisher_name": finisher_record.finisher_name,
+                    "hq_country": finisher_record.hq_country,
                 },
             )
-        for record in source.suppliers:
-            existing_supplier = session.get(Supplier, record.supplier_id)
+        for supplier_record in source.suppliers:
+            existing_supplier = session.get(
+                Supplier,
+                supplier_record.supplier_id,
+            )
             if existing_supplier is None:
                 session.add(
                     Supplier(
-                        supplier_id=record.supplier_id,
-                        supplier_name=record.supplier_name,
-                        hq_country=record.hq_country,
+                        supplier_id=supplier_record.supplier_id,
+                        supplier_name=supplier_record.supplier_name,
+                        hq_country=supplier_record.hq_country,
                         child_labor_flagged=False,
                         flagged_at=None,
                     )
                 )
             else:
-                existing_supplier.supplier_name = record.supplier_name
-                existing_supplier.hq_country = record.hq_country
-        for record in source.factories:
+                existing_supplier.supplier_name = supplier_record.supplier_name
+                existing_supplier.hq_country = supplier_record.hq_country
+        for factory_record in source.factories:
             _upsert(
                 session,
                 Factory,
-                record.factory_id,
+                factory_record.factory_id,
                 {
-                    "factory_id": record.factory_id,
-                    "supplier_id": record.supplier_id,
-                    "factory_name": record.factory_name,
-                    "address_line": record.address_line,
-                    "city": record.city,
-                    "country": record.country,
+                    "factory_id": factory_record.factory_id,
+                    "supplier_id": factory_record.supplier_id,
+                    "factory_name": factory_record.factory_name,
+                    "address_line": factory_record.address_line,
+                    "city": factory_record.city,
+                    "country": factory_record.country,
                 },
             )
-        for record in source.toys:
+        for toy_record in source.toys:
             _upsert(
                 session,
                 Toy,
-                record.toy_id,
+                toy_record.toy_id,
                 {
-                    "toy_id": record.toy_id,
-                    "toy_name": record.toy_name,
+                    "toy_id": toy_record.toy_id,
+                    "toy_name": toy_record.toy_name,
                 },
             )
-        for record in source.parts:
+        for part_record in source.parts:
             _upsert(
                 session,
                 Part,
-                record.part_id,
+                part_record.part_id,
                 {
-                    "part_id": record.part_id,
-                    "part_name": record.part_name,
+                    "part_id": part_record.part_id,
+                    "part_name": part_record.part_name,
                 },
             )
 
         session.flush()
 
-        for record in source.finisher_toys:
+        for finisher_toy_record in source.finisher_toys:
             _upsert(
                 session,
                 FinisherToy,
-                (record.finisher_id, record.toy_id),
+                (finisher_toy_record.finisher_id, finisher_toy_record.toy_id),
                 {
-                    "finisher_id": record.finisher_id,
-                    "toy_id": record.toy_id,
-                    "retail_price_usd": record.retail_price_usd,
-                    "units_per_year": record.units_per_year,
+                    "finisher_id": finisher_toy_record.finisher_id,
+                    "toy_id": finisher_toy_record.toy_id,
+                    "retail_price_usd": finisher_toy_record.retail_price_usd,
+                    "units_per_year": finisher_toy_record.units_per_year,
                 },
             )
-        for record in source.toy_parts:
+        for toy_part_record in source.toy_parts:
             _upsert(
                 session,
                 ToyPart,
-                (record.toy_id, record.part_id),
+                (toy_part_record.toy_id, toy_part_record.part_id),
                 {
-                    "toy_id": record.toy_id,
-                    "part_id": record.part_id,
-                    "quantity": record.quantity,
+                    "toy_id": toy_part_record.toy_id,
+                    "part_id": toy_part_record.part_id,
+                    "quantity": toy_part_record.quantity,
                 },
             )
-        for record in source.part_sources:
+        for part_source_record in source.part_sources:
             _upsert(
                 session,
                 PartSource,
-                (record.part_id, record.factory_id),
+                (part_source_record.part_id, part_source_record.factory_id),
                 {
-                    "part_id": record.part_id,
-                    "factory_id": record.factory_id,
-                    "unit_cost_usd": record.unit_cost_usd,
+                    "part_id": part_source_record.part_id,
+                    "factory_id": part_source_record.factory_id,
+                    "unit_cost_usd": part_source_record.unit_cost_usd,
                 },
             )
 

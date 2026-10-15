@@ -98,9 +98,7 @@ class Factory(Base):
         passive_deletes=True,
     )
 
-    __table_args__ = (
-        Index("ix_factories_supplier_id", "supplier_id"),
-    )
+    __table_args__ = (Index("ix_factories_supplier_id", "supplier_id"),)
 
 
 class Part(Base):

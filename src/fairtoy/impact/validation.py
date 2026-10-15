@@ -78,9 +78,7 @@ class ConsistencyRegistry:
     ) -> None:
         previous_name = names.setdefault(identity, name)
         if previous_name != name:
-            raise ImpactInputError(
-                f"{field_name} {identity!r} has conflicting names"
-            )
+            raise ImpactInputError(f"{field_name} {identity!r} has conflicting names")
 
     def _validate_flag(self, path: ImpactPath) -> None:
         previous_flag = self.supplier_flags.setdefault(
@@ -112,9 +110,7 @@ def _validate_unit_cost(unit_cost_usd: Decimal | None) -> None:
     if not isinstance(unit_cost_usd, Decimal):
         raise ImpactInputError("unit_cost_usd must be a Decimal or None")
     if not unit_cost_usd.is_finite() or unit_cost_usd < 0:
-        raise ImpactInputError(
-            "unit_cost_usd must be a finite, non-negative number"
-        )
+        raise ImpactInputError("unit_cost_usd must be a finite, non-negative number")
 
 
 def validate_fact(fact: TraceabilityFact) -> FactIdentity:
@@ -149,9 +145,7 @@ def source_path_from_fact(
             )
         return None
     if any(value is None for value in required_source_fields):
-        raise ImpactInputError(
-            "supplier and factory source fields must be complete"
-        )
+        raise ImpactInputError("supplier and factory source fields must be complete")
     if not isinstance(fact.supplier_flagged, bool):
         raise ImpactInputError("supplier_flagged must be a boolean")
 

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Literal
 
-
 ImpactStatus = Literal[
     "unaffected",
     "potentially_affected",
@@ -26,20 +25,12 @@ POTENTIALLY_AFFECTED: ImpactStatus = "potentially_affected"
 AFFECTED: ImpactStatus = "affected"
 
 TOY_UNAFFECTED_REASON_CODE: ImpactReasonCode = "toy_unaffected"
-TOY_POTENTIALLY_AFFECTED_REASON_CODE: ImpactReasonCode = (
-    "toy_potentially_affected"
-)
+TOY_POTENTIALLY_AFFECTED_REASON_CODE: ImpactReasonCode = "toy_potentially_affected"
 TOY_AFFECTED_REASON_CODE: ImpactReasonCode = "toy_affected"
 PART_NO_KNOWN_SOURCES_REASON_CODE: ImpactReasonCode = "part_no_known_sources"
-PART_NO_FLAGGED_SOURCES_REASON_CODE: ImpactReasonCode = (
-    "part_no_flagged_sources"
-)
-PART_ALL_SOURCES_FLAGGED_REASON_CODE: ImpactReasonCode = (
-    "part_all_sources_flagged"
-)
-PART_MIXED_SOURCE_FLAGS_REASON_CODE: ImpactReasonCode = (
-    "part_mixed_source_flags"
-)
+PART_NO_FLAGGED_SOURCES_REASON_CODE: ImpactReasonCode = "part_no_flagged_sources"
+PART_ALL_SOURCES_FLAGGED_REASON_CODE: ImpactReasonCode = "part_all_sources_flagged"
+PART_MIXED_SOURCE_FLAGS_REASON_CODE: ImpactReasonCode = "part_mixed_source_flags"
 
 
 class ImpactInputError(ValueError):

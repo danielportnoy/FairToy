@@ -21,7 +21,6 @@ from fairtoy.models import (
     ToyPart,
 )
 
-
 FIXTURE_DIR = Path(__file__).parents[1] / "data"
 
 
@@ -162,9 +161,9 @@ def test_sqlite_foreign_keys_and_domain_checks_are_enabled(
     try:
         with session_factory() as session:
             import_fixtures(session, FIXTURE_DIR)
-            pragma_value = session.connection().exec_driver_sql(
-                "PRAGMA foreign_keys"
-            ).scalar_one()
+            pragma_value = (
+                session.connection().exec_driver_sql("PRAGMA foreign_keys").scalar_one()
+            )
             assert pragma_value == 1
 
         with session_factory() as session:

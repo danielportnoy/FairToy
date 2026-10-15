@@ -9,7 +9,6 @@ from fairtoy.api import create_app
 from fairtoy.db import create_engine_for_path, create_schema, create_session_factory
 from fairtoy.importer import import_fixtures
 
-
 FIXTURE_DIR = Path(__file__).parents[1] / "data"
 
 
@@ -52,9 +51,7 @@ def test_lists_finisher_toy_summaries_with_derived_impact(
     assert response.status_code == 200
     toys = response.json()
     assert toys
-    assert [toy["toy_id"] for toy in toys] == sorted(
-        toy["toy_id"] for toy in toys
-    )
+    assert [toy["toy_id"] for toy in toys] == sorted(toy["toy_id"] for toy in toys)
     toy = next(toy for toy in toys if toy["toy_id"] == "TOY-0275")
     assert set(toy) == {
         "finisher_id",
@@ -112,9 +109,7 @@ def test_toy_detail_is_scoped_to_selected_finisher(
     )
 
     assert response.status_code == 404
-    assert response.json()["detail"] == (
-        "Toy is not in the selected Finisher catalog"
-    )
+    assert response.json()["detail"] == ("Toy is not in the selected Finisher catalog")
 
 
 def test_unknown_finisher_is_rejected_for_toy_list(
@@ -197,7 +192,9 @@ def test_supplier_flag_update_is_explicit_idempotent_and_recalculates(
         if candidate_path["supplier_id"] == supplier_id
     ]
     assert unflagged_paths
-    assert all(not candidate_path["supplier_flagged"] for candidate_path in unflagged_paths)
+    assert all(
+        not candidate_path["supplier_flagged"] for candidate_path in unflagged_paths
+    )
 
 
 def test_unknown_supplier_flag_update_returns_not_found(

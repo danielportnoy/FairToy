@@ -206,10 +206,7 @@ class TraceabilityRepository:
         if toy_id is not None:
             statement = statement.where(Toy.toy_id == toy_id)
 
-        return [
-            dict(row)
-            for row in self._session.execute(statement).mappings().all()
-        ]
+        return [dict(row) for row in self._session.execute(statement).mappings().all()]
 
     @staticmethod
     def _map_rows(
@@ -228,9 +225,7 @@ class TraceabilityRepository:
                 )
                 grouped[key] = accumulator
             elif accumulator.toy_name != row["toy_name"]:
-                raise ValueError(
-                    f"toy_id {row['toy_id']!r} has conflicting names"
-                )
+                raise ValueError(f"toy_id {row['toy_id']!r} has conflicting names")
 
             fact = TraceabilityRepository._fact_from_row(row)
             if fact is not None:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import AsyncIterator, Generator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -12,12 +12,12 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from .api_schemas import (
     FinisherResponse,
+    ImpactPathResponse,
     PartImpactResponse,
-    SupplierResponse,
     SupplierFlagUpdateRequest,
+    SupplierResponse,
     ToyDetailResponse,
     ToySummaryResponse,
-    ImpactPathResponse,
 )
 from .config import DEFAULT_DATABASE_PATH
 from .db import create_engine_for_path, create_session_factory
@@ -40,7 +40,7 @@ def create_app(
     session_factory = create_session_factory(engine)
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI):
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         yield
         engine.dispose()
 
@@ -71,7 +71,9 @@ def create_app(
         session: Session = Depends(get_session),
     ) -> list[SupplierResponse]:
         repository = TraceabilityRepository(session)
-        return [_supplier_response(supplier) for supplier in repository.list_suppliers()]
+        return [
+            _supplier_response(supplier) for supplier in repository.list_suppliers()
+        ]
 
     @app.patch(
         "/api/suppliers/{supplier_id}",
@@ -112,10 +114,7 @@ def create_app(
         impacts = calculate_toy_impacts(
             repository.list_toy_traceability(finisher_id=finisher_id)
         )
-        return [
-            _summary_response(finisher_id, impact)
-            for impact in impacts
-        ]
+        return [_summary_response(finisher_id, impact) for impact in impacts]
 
     @app.get(
         "/api/toys/{toy_id}",

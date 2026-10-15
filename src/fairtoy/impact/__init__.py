@@ -12,8 +12,8 @@ from .contracts import (
     ImpactReasonCode,
     ImpactStatus,
     PartImpact,
-    ToyTraceability,
     ToyImpact,
+    ToyTraceability,
     TraceabilityFact,
 )
 
