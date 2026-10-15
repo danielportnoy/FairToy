@@ -1,0 +1,13 @@
+part_id,part_name,supplier_id,factory_id,unit_cost_usd
+PRT-001,injection-moulded body,SUP-001,FAC-001,4.50
+PRT-002,wheel set,SUP-001,FAC-001,1.20
+PRT-002,wheel set,SUP-002,FAC-002,1.35
+PRT-003,axle assembly,SUP-002,FAC-002,2.10
+PRT-004,paint coating,SUP-002,FAC-002,0.80
+PRT-004,paint coating,SUP-003,FAC-003,0.95
+PRT-005,packaging insert,SUP-003,FAC-003,0.40
+PRT-006,electronic module,SUP-003,FAC-003,5.00
+PRT-007,battery housing,SUP-003,FAC-003,1.10
+PRT-007,battery housing,SUP-001,FAC-001,1.25
+PRT-008,printed decal,SUP-001,FAC-001,0.30
+PRT-009,fastener set,SUP-001,FAC-001,0.50

@@ -68,11 +68,15 @@ def create_app(
 
     @app.get("/api/suppliers", response_model=list[SupplierResponse])
     def list_suppliers(
+        finisher_id: str | None = Query(default=None, min_length=1),
         session: Session = Depends(get_session),
     ) -> list[SupplierResponse]:
         repository = TraceabilityRepository(session)
+        if finisher_id is not None:
+            _require_finisher(repository, finisher_id)
         return [
-            _supplier_response(supplier) for supplier in repository.list_suppliers()
+            _supplier_response(supplier)
+            for supplier in repository.list_suppliers(finisher_id=finisher_id)
         ]
 
     @app.patch(
@@ -175,6 +179,7 @@ def _supplier_response(supplier: SupplierSummary) -> SupplierResponse:
         hq_country=supplier.hq_country,
         child_labor_flagged=supplier.child_labor_flagged,
         flagged_at=_as_utc(supplier.flagged_at),
+        related_toy_count=supplier.related_toy_count,
     )
 
 

@@ -26,6 +26,28 @@ describe("fairtoyApi", () => {
     expect(new Headers(init?.headers).get("Accept")).toBe("application/json");
   });
 
+  it("encodes Finisher filters for Supplier review", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse([]));
+
+    await expect(fairtoyApi.listSuppliers("FIN 001")).resolves.toEqual([]);
+
+    const [input] = fetchMock.mock.calls[0] ?? [];
+    expect(input).toBe("/api/suppliers?finisher_id=FIN+001");
+  });
+
+  it("uses the global Supplier collection without a Finisher", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(jsonResponse([]));
+
+    await expect(fairtoyApi.listSuppliers()).resolves.toEqual([]);
+
+    const [input] = fetchMock.mock.calls[0] ?? [];
+    expect(input).toBe("/api/suppliers");
+  });
+
   it("sends an explicit Supplier flag state", async () => {
     const supplier = {
       supplier_id: "SUP/1",

@@ -396,38 +396,43 @@ not a transcript of the planning conversation.
   response, but it directly satisfies the traceability requirement. Summary
   reads must not include the full path graph.
 
-## D036 — Use progressive-disclosure Finisher views
+## D036 — Use a progressive-disclosure Finisher workflow
 
-- **Status:** Accepted
-- **Decision:** Organize the MVP into three focused views:
-  - **Needs Attention:** the default Finisher view, showing affected and
-    potentially affected Toys in a compact action queue;
-  - **Inventory:** the complete Toy catalog in a searchable, filterable table;
-  - **Toy Investigation:** the selected Toy's Parts and possible
-    Part-to-Factory-to-Supplier paths, with contextual Supplier actions.
-  The UI must not render the entire relationship graph as one equally weighted
-  page.
-- **Rationale:** A list of many Toys is useful for search and completeness,
-  but it is not an effective first experience when every row competes for
-  attention. Progressive disclosure lets the Finisher see risk first and open
-  traceability evidence on demand.
-- **Trade-off:** The workflow has more navigation states than the original
-  dashboard, but remains within the existing summary/detail API boundary.
-  A purpose-built overview endpoint is not required for this MVP.
+- **Status:** Superseded by D043; Supplier portion refined by D045
+- **Decision:** Organize the MVP into two top-level workspaces:
+  - **Toys:** one searchable catalog with a default `Needs attention` mode
+    showing affected and potentially affected Toys, plus an `All inventory`
+    mode that includes unaffected Toys;
+  - **Suppliers:** a centralized list of Suppliers with their current risk
+    state and flag/unflag action.
+  A selected Toy opens **Toy Investigation** as a drill-down view from either
+  Toys mode. The UI must not render the entire relationship graph as one
+  equally weighted page.
+- **Rationale:** Needs Attention and Inventory are two filters over the same
+  Toy resource, not two different user workflows. Combining them removes a
+  duplicated list while preserving risk-first triage and complete inventory
+  access. Supplier review is a distinct workflow because Supplier is the risk
+  subject and the flag action must be discoverable.
+- **Trade-off:** The workflow adds a focused global Supplier workspace, but
+  avoids both duplicate Toy tabs and generic administration screens. A
+  purpose-built Toy overview projection is not required for this MVP.
 
 ## D037 — Require explicit Finisher context without authentication
 
 - **Status:** Accepted
 - **Decision:** Because authentication and user accounts are out of scope,
-  the first visit requires an explicit Finisher selection. The application
-  must not silently choose the first fixture record. The selected
-  `finisher_id` remains visible and is preserved across the workflow, with
-  URL or local-storage persistence left as a frontend implementation detail.
+  the first Toys/catalog view requires an explicit Finisher selection. The
+  application must not silently choose the first fixture record. The global
+  Supplier Review workspace may be opened without a selected Finisher. When
+  selected, the `finisher_id` remains visible and is preserved across the
+  Finisher-scoped workflow, with URL or local-storage persistence left as a
+  frontend implementation detail.
 - **Rationale:** Multiple Finishers exist in the fixture data, and silently
-  showing one company's exposure would make the product context ambiguous.
-- **Trade-off:** The first visit has one additional selection step, but it
-  makes the demo state explicit and prevents accidental cross-Finisher
-  interpretation.
+  showing one company's exposure would make the Toy context ambiguous. A
+  Supplier flag is global, so Supplier discovery should not be blocked by a
+  Toy catalog selection.
+- **Trade-off:** The first Toys view has one additional selection step, while
+  Supplier Review can start from the global risk registry.
 
 ## D038 — Keep the MVP scale boundary explicit
 
@@ -485,3 +490,68 @@ not a transcript of the planning conversation.
   contract while the core traceability workflow is still being polished.
 - **Future:** Distinguish missing evidence from unaffected status and expose
   physical exposure metrics when the data and workflow support them.
+
+## D042 — Add a focused Finisher-scoped Supplier Review read
+
+- **Status:** Superseded by D045
+- **Decision:** Support Supplier Review with a workflow-specific read such as
+  `GET /api/suppliers?finisher_id={finisher_id}`. Return one row per unique
+  Supplier reachable from the selected Finisher's Toy catalog, including
+  current flag state, `flagged_at`, and a related-Toy count where practical.
+  Keep the existing global Supplier flag mutation and do not add generic
+  Supplier CRUD.
+- **Rationale:** A Finisher must be able to discover and flag a Supplier from
+  a centralized place. Reconstructing Supplier relationships by fetching
+  every Toy detail would create an avoidable N+1 request pattern, while
+  showing every global Supplier would add irrelevant noise.
+- **Trade-off:** This adds one small workflow query and its tests, but keeps
+  the Supplier workspace relevant to the active Finisher without changing
+  the global Supplier risk semantics.
+
+## D043 — Use one Toys list with a status filter
+
+- **Status:** Superseded by D044
+- **Decision:** Keep one Toys workspace and one list. The default status
+  filter is `Needs attention`, meaning affected and potentially affected
+  Toys. `All statuses` includes unaffected Toys. Search, status filtering,
+  and client-side pagination of ten rows per page operate on that same list.
+  Toy Investigation remains a drill-down, and Suppliers remains a separate
+  workspace.
+- **Rationale:** Needs attention is a useful starting filter, not a second
+  information architecture concept. One list makes the relationship between
+  triage and complete inventory explicit while avoiding duplicated controls.
+- **Boundary:** Pagination is intentionally client-side over the existing
+  compact summary response. No pagination API, new endpoint, or server-side
+  projection is added for this take-home.
+
+## D044 — Keep status filtering explicit without a risk-only default
+
+- **Status:** Accepted
+- **Decision:** Remove the `Needs attention` filter from the Toys workspace.
+  Keep one list with `All statuses` as the default and retain explicit
+  Affected, Potentially affected, and Unaffected filters. Search and
+  ten-row client-side pagination continue to apply to that same list.
+- **Rationale:** The Toys workspace should not imply a separate risk queue
+  when the product only needs one catalog list. Users can still narrow to
+  risk states directly when triage is the goal.
+- **Compatibility:** Toy Investigation, impact semantics, and the existing
+  Supplier API contract remain intact; Supplier Review scope is refined by
+  D045.
+
+## D045 — Make Supplier Review a global risk workspace
+
+- **Status:** Accepted
+- **Decision:** Supplier Review is available without a selected Finisher and
+  lists all Suppliers by default. It supports search, flagged/unflagged
+  filtering, and one explicit `Flag supplier`/`Unflag supplier` action per
+  Supplier. When a Finisher is selected, the UI may show or filter by
+  relevance to that catalog, but relevance is not required to flag a
+  Supplier. Use the unfiltered `GET /api/suppliers` collection as the primary
+  read; retain the optional `finisher_id` query for contextual relevance.
+- **Rationale:** Supplier is the global risk subject. A Finisher may need to
+  flag a Supplier before it is currently related to that Finisher's catalog,
+  and hiding the action inside a Toy source path makes the core workflow hard
+  to discover.
+- **Trade-off:** Flagging an unrelated Supplier has no current Toy impact for
+  the active Finisher. The UI must explain that the mutation is global and
+  may affect other Finishers or future relationships.

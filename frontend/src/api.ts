@@ -24,6 +24,7 @@ export interface Supplier {
   hq_country: string | null;
   child_labor_flagged: boolean;
   flagged_at: string | null;
+  related_toy_count: number | null;
 }
 
 export interface ImpactPath {
@@ -111,13 +112,24 @@ function toyQuery(finisherId: string): string {
   return `/api/toys?${params.toString()}`;
 }
 
+function supplierQuery(finisherId: string): string {
+  const params = new URLSearchParams({ finisher_id: finisherId });
+  return `/api/suppliers?${params.toString()}`;
+}
+
 export const fairtoyApi = {
   listFinishers(signal?: AbortSignal): Promise<Finisher[]> {
     return request<Finisher[]>("/api/finishers", { signal });
   },
 
-  listSuppliers(signal?: AbortSignal): Promise<Supplier[]> {
-    return request<Supplier[]>("/api/suppliers", { signal });
+  listSuppliers(
+    finisherId?: string,
+    signal?: AbortSignal,
+  ): Promise<Supplier[]> {
+    return request<Supplier[]>(
+      finisherId ? supplierQuery(finisherId) : "/api/suppliers",
+      { signal },
+    );
   },
 
   listToys(finisherId: string, signal?: AbortSignal): Promise<ToySummary[]> {

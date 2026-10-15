@@ -6,7 +6,7 @@ from fairtoy.cli import main
 from fairtoy.db import create_engine_for_path, create_session_factory
 from fairtoy.models import Supplier
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data"
+FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
 
 
 def _run_setup(database_path: Path) -> None:

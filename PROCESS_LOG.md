@@ -340,6 +340,178 @@ full conversation.
   `SYSTEM_DESIGN.md`, and `README.md` so the implementation handoff and
   final repository describe the same workflow.
 
+## 2026-10-15 — Toy and Supplier navigation refinement
+
+- **Phase:** Product design
+- **Status:** Accepted; implementation handoff update
+- **Decision:** Consolidate Needs Attention and Inventory into one Toys
+  workspace with `Needs attention` as the default mode and `All inventory` as
+  the complete-catalog mode.
+- **Decision:** Add a separate Finisher-scoped Supplier Review workspace.
+  Show one row per relevant Supplier with current flag state, related-Toy
+  context, and explicit flag/unflag actions. Keep Supplier actions available
+  from Toy Investigation as a contextual shortcut.
+- **API boundary:** add one focused `finisher_id`-filtered Supplier read
+  rather than reconstructing Supplier relationships through every Toy detail.
+  Do not add generic Supplier CRUD or an all-Suppliers Finisher-facing view.
+- **Rationale:** Two identical-looking Toy tabs obscured the difference
+  between triage and inventory, while hiding Supplier actions inside a random
+  source path made the core flagging workflow difficult to discover.
+
+## 2026-10-15 — Toy and Supplier workspace implementation
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** implement the accepted Toys workspace modes and the
+  Finisher-scoped Supplier Review workspace without changing the existing
+  impact model or general API surface.
+- **Backend behavior:** `GET /api/suppliers?finisher_id=...` returns unique
+  relevant Suppliers with deterministic ordering and related-Toy counts.
+  Finisher validation and the unfiltered Supplier collection remain intact.
+- **Frontend behavior:** keep Needs attention as the default Toys mode, offer
+  All inventory as the complete-catalog mode, require explicit Finisher
+  selection, and provide searchable/filterable Supplier review rows with
+  confirmed global flag/unflag actions. Toy Investigation remains the
+  traceability drill-down and retains contextual Supplier actions.
+- **Verification:** focused backend repository/API tests passed (`25 passed`);
+  frontend tests passed (`7 passed`), and frontend typecheck/build passed.
+  The full backend suite passed (`46 passed`). Ruff lint/format, mypy,
+  compilation, and diff checks also passed. The environment still reports 11
+  third-party Python 3.14 deprecation warnings.
+- **Explicit deferral:** no new statuses, exposure metrics, pagination,
+  lazy loading, i18n, generic CRUD, or deployment infrastructure.
+
+## 2026-10-15 — Single Toys list UX correction
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** replace the Toys mode controls with one status-filtered Toys
+  workspace while preserving the separate Finisher-scoped Supplier workspace
+  and Toy Investigation drill-down.
+- **UI behavior:** default the status filter to Needs attention (affected and
+  potentially affected), provide All statuses to include unaffected Toys,
+  apply search and status filtering to the same list, and paginate the loaded
+  summaries in ten-row client-side pages.
+- **Compatibility:** no new API endpoint or server-side pagination was added.
+  Explicit Finisher selection, Supplier confirmation, contextual Supplier
+  actions, impact semantics, and expandable traceability detail remain
+  unchanged.
+- **Verification:** frontend tests passed (`7 passed`), frontend typecheck
+  and production build passed, and the full backend suite passed (`46
+  passed`). Mypy, Ruff lint/format, compilation, and diff checks also passed.
+  The environment still reports 11 third-party Python 3.14 deprecation
+  warnings.
+- **Explicit deferral:** React Router, separate URLs, new statuses, exposure
+  metrics, generic CRUD, and deployment infrastructure remain out of scope.
+
+## 2026-10-15 — Remove risk-only Toys filter
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** remove the Needs attention status filter from the single Toys
+  workspace without changing Supplier scoping or the Toy Investigation flow.
+- **UI behavior:** default the same Toys list to All statuses and retain
+  explicit Affected, Potentially affected, and Unaffected filters, search,
+  and ten-row client-side pagination.
+- **Compatibility:** no API, domain, impact, or Supplier query changes were
+  needed.
+- **Verification:** frontend tests passed (`7 passed`), frontend typecheck
+  and production build passed, and the full backend suite passed (`46
+  passed`). Mypy, Ruff lint/format, compilation, and diff checks also passed.
+  The environment still reports 11 third-party Python 3.14 deprecation
+  warnings.
+
+## 2026-10-15 — Add a small demo fixture set
+
+- **Phase:** Foundation / developer experience
+- **Status:** Implemented and verified
+- **Scope:** preserve the original assignment export under `data/full/` and
+  add a curated `data/demo/` fixture set used by default local setup.
+- **Demo shape:** three Finishers with two Toys each, three Suppliers, three
+  Factories, nine Parts, and intentionally non-global Supplier coverage:
+  `FIN-001` uses `SUP-001`/`SUP-002`, `FIN-002` uses
+  `SUP-002`/`SUP-003`, and `FIN-003` uses `SUP-001`/`SUP-003`.
+- **Reset behavior:** `fairtoy setup` and `fairtoy reset` use `data/demo/` by
+  default; the full dataset can be loaded into a separate database with
+  `--data-dir data/full`. Existing reset semantics remain unchanged:
+  validation occurs before a destructive reset, and normal setup preserves
+  runtime Supplier flags.
+- **Verification:** demo, full, and default resets completed successfully;
+  the full Python suite passed (`47 passed`), Ruff lint/format and mypy
+  passed, and the demo-specific scope test confirms that no Supplier is
+  related to all three Finishers.
+
+## 2026-10-16 — Hide redundant Toy reason-code presentation
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** remove the visible Toy-level `reason_code` tag from Toy
+  Investigation because the user-facing status badge and explanation already
+  communicate the result.
+- **Compatibility:** retain `reason_code` in the API and frontend data
+  contract, and retain Part-level reason codes inside the expandable detail.
+- **Verification:** frontend tests passed (`7 passed`), frontend typecheck
+  and production build passed, and the full backend suite passed (`47
+  passed`). Mypy, Ruff lint/format, compilation, and diff checks also passed.
+  The environment still reports 11 third-party Python 3.14 deprecation
+  warnings.
+
+## 2026-10-16 — Make Supplier Review global
+
+- **Phase:** Product design
+- **Status:** Accepted; implementation update required
+- **Decision:** Supplier Review is a global workspace available without a
+  selected Finisher. It lists all Suppliers, supports search and
+  flagged/unflagged filtering, and allows a confirmed flag or unflag action.
+  Finisher relevance is optional context rather than a hard scope.
+- **Rationale:** Supplier is the global risk subject. A Supplier may need to
+  be flagged before it is related to a selected Finisher, and hiding the
+  action inside a Toy source path makes the required workflow difficult to
+  discover.
+- **Compatibility:** The existing unfiltered Supplier API already supports
+  the primary read; the optional `finisher_id` query remains useful for
+  relevance context. A global flag still recalculates every relevant Toy.
+- **UI behavior:** When a flagged unrelated Supplier has no current impact on
+  the selected Finisher, explain that explicitly rather than hiding or
+  preventing the action.
+
+## 2026-10-16 — Global Supplier Review implementation
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** make Supplier Review available before Finisher selection and use
+  the unfiltered Supplier collection as its primary read.
+- **UI behavior:** show all Suppliers with search/filter controls and
+  confirmed global flag/unflag actions. When a Finisher is selected, merge
+  contextual related-Toy counts into those global rows and explain when a
+  flagged Supplier has no current Toy impact for that Finisher.
+- **Compatibility:** Toys remain Finisher-scoped and require explicit
+  selection; Toy Investigation and contextual Supplier actions remain
+  unchanged. No new endpoint or generic CRUD was added.
+- **Verification:** frontend tests passed (`9 passed`), frontend typecheck and
+  production build passed, and the full backend suite passed (`47 passed`).
+  Mypy, Ruff lint/format, compilation, and diff checks also passed. The
+  environment still reports 11 third-party Python 3.14 deprecation warnings.
+
+## 2026-10-16 — Separate frontend workflow boundaries
+
+- **Phase:** User workflow
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** reimplement the existing UI behavior with explicit boundaries
+  instead of keeping data loading, mutation handling, filtering, pagination,
+  and all rendering in `App.tsx`.
+- **Structure:** `App.tsx` is now a small entrypoint that exports
+  `AppShell`. `useFairToyData.ts` owns request lifecycle and authoritative
+  refreshes; `view-model.ts` owns pure filtering, sorting, pagination, and
+  Supplier relevance transformations; and the workspace/detail components own
+  their local presentation state.
+- **Compatibility:** no API, schema, impact-rule, workspace, or confirmation
+  behavior changed. Toys remain explicitly Finisher-scoped, Supplier Review
+  remains global, and Toy Investigation retains expandable source paths and
+  contextual Supplier actions.
+- **Verification:** frontend tests passed (`12 passed`), frontend typecheck
+  and production build passed, and `git diff --check` passed.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

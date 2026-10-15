@@ -21,7 +21,7 @@ from fairtoy.models import (
     ToyPart,
 )
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data"
+FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
 
 
 def _session_for(path: Path):

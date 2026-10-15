@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from .impact import ToyTraceability, TraceabilityFact
@@ -34,6 +35,7 @@ class SupplierSummary:
     hq_country: str | None
     child_labor_flagged: bool
     flagged_at: datetime | None
+    related_toy_count: int | None = None
 
 
 @dataclass
@@ -84,16 +86,47 @@ class TraceabilityRepository:
             hq_country=result.hq_country,
         )
 
-    def list_suppliers(self) -> tuple[SupplierSummary, ...]:
-        rows = self._session.execute(
-            select(
+    def list_suppliers(
+        self,
+        *,
+        finisher_id: str | None = None,
+    ) -> tuple[SupplierSummary, ...]:
+        rows: Sequence[Any]
+        if finisher_id is None:
+            rows = self._session.execute(
+                select(
+                    Supplier.supplier_id,
+                    Supplier.supplier_name,
+                    Supplier.hq_country,
+                    Supplier.child_labor_flagged,
+                    Supplier.flagged_at,
+                ).order_by(Supplier.supplier_id)
+            ).all()
+        else:
+            self._validate_identifier(finisher_id, "finisher_id")
+            supplier_columns = (
                 Supplier.supplier_id,
                 Supplier.supplier_name,
                 Supplier.hq_country,
                 Supplier.child_labor_flagged,
                 Supplier.flagged_at,
-            ).order_by(Supplier.supplier_id)
-        ).all()
+            )
+            rows = self._session.execute(
+                select(
+                    *supplier_columns,
+                    func.count(func.distinct(Toy.toy_id)).label("related_toy_count"),
+                )
+                .select_from(Supplier)
+                .join(Factory, Factory.supplier_id == Supplier.supplier_id)
+                .join(PartSource, PartSource.factory_id == Factory.factory_id)
+                .join(ToyPart, ToyPart.part_id == PartSource.part_id)
+                .join(Toy, Toy.toy_id == ToyPart.toy_id)
+                .join(FinisherToy, FinisherToy.toy_id == Toy.toy_id)
+                .where(FinisherToy.finisher_id == finisher_id)
+                .group_by(*supplier_columns)
+                .order_by(Supplier.supplier_id)
+            ).all()
+
         return tuple(
             SupplierSummary(
                 supplier_id=row.supplier_id,
@@ -101,6 +134,7 @@ class TraceabilityRepository:
                 hq_country=row.hq_country,
                 child_labor_flagged=row.child_labor_flagged,
                 flagged_at=row.flagged_at,
+                related_toy_count=getattr(row, "related_toy_count", None),
             )
             for row in rows
         )

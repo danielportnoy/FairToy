@@ -9,7 +9,7 @@ from fairtoy.importer import import_fixtures
 from fairtoy.models import FinisherToy, Part, Toy, ToyPart
 from fairtoy.repository import TraceabilityRepository
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data"
+FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
 
 
 @pytest.fixture(scope="module")
@@ -59,6 +59,24 @@ def test_lists_only_the_selected_finishers_catalog(
     assert [toy.toy_id for toy in toys] == sorted(toy.toy_id for toy in toys)
     assert all(toy.finisher_id == "FIN-003" for toy in toys)
     assert any(toy.toy_id == "TOY-0275" for toy in toys)
+
+
+def test_lists_unique_finisher_suppliers_with_related_toy_counts(
+    session_factory,
+) -> None:
+    with session_factory() as session:
+        suppliers = TraceabilityRepository(session).list_suppliers(
+            finisher_id="FIN-003",
+        )
+
+    assert suppliers
+    assert [supplier.supplier_id for supplier in suppliers] == sorted(
+        supplier.supplier_id for supplier in suppliers
+    )
+    assert all(
+        supplier.related_toy_count is not None and supplier.related_toy_count > 0
+        for supplier in suppliers
+    )
 
 
 def test_detail_read_is_scoped_to_the_finisher_catalog(

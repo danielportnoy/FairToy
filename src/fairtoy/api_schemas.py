@@ -26,6 +26,7 @@ class SupplierResponse(BaseModel):
     hq_country: str | None
     child_labor_flagged: bool
     flagged_at: datetime | None
+    related_toy_count: int | None = None
 
 
 class SupplierFlagUpdateRequest(BaseModel):

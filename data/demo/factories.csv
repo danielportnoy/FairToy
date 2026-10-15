@@ -1,0 +1,4 @@
+factory_id,supplier_id,factory_name,address_line,city,country
+FAC-001,SUP-001,Northstar Plastics — Poznan Plant,12 Industrial Way,Poznan,Poland
+FAC-002,SUP-002,Cedar Components — Chennai Plant,44 Maker Road,Chennai,India
+FAC-003,SUP-003,Harbor Works — Da Nang Plant,8 Coastal Avenue,Da Nang,Vietnam

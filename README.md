@@ -9,8 +9,8 @@ labor.
 
 The foundation, impact-analysis service, repository boundary, API, and initial
 frontend slice are implemented. The frontend workflow is being refined around
-Needs Attention, Inventory, and Toy Investigation views. The implementation
-follows the decisions in
+one Toys workspace, a Finisher-scoped Supplier Review, and Toy Investigation.
+The implementation follows the decisions in
 [`SPEC.md`](SPEC.md).
 
 ## Current scope
@@ -45,11 +45,10 @@ production deployment are intentionally deferred.
 
 ## Source data
 
-The assignment data is currently available at
-`../toy_data/` in the preparation workspace. The original six CSV files are
-copied into this repository under `data/` so a fresh checkout can be seeded
-reproducibly. macOS metadata under `__MACOSX/` is not part of the application
-data.
+The repository contains two reproducible fixture sets under `data/`:
+`data/demo/` is the small default dataset for local UI work, and
+`data/full/` preserves the original assignment export for broader integration
+coverage. macOS metadata under `__MACOSX/` is not part of either dataset.
 
 Local database setup and API run instructions are documented below. The
 frontend is a separate Vite application and uses the API's workflow-oriented
@@ -58,8 +57,8 @@ endpoints.
 ## Local database setup
 
 The foundation slice uses Python, SQLAlchemy, and a file-backed SQLite
-database. The importer reads the six CSV fixtures from `data/` and writes
-the canonical tables described in `SYSTEM_DESIGN.md`.
+database. The importer reads the six CSV fixtures from the selected fixture
+directory and writes the canonical tables described in `SYSTEM_DESIGN.md`.
 
 Create a virtual environment, install the project and development
 dependencies, then run the tests:
@@ -74,7 +73,7 @@ ruff format --check src tests
 mypy src/fairtoy
 ```
 
-Create or update the local database with the fixtures:
+Create or update the local database with the small demo fixtures:
 
 ```bash
 fairtoy setup
@@ -82,10 +81,18 @@ fairtoy setup
 
 The default database is `data/generated/fairtoy.sqlite3`, which is ignored by
 git. Re-running `fairtoy setup` is idempotent and preserves current Supplier
-flags. To intentionally recreate the database from the fixtures:
+flags. To intentionally recreate the demo database:
 
 ```bash
 fairtoy reset
+```
+
+To load the original full assignment dataset into a separate database:
+
+```bash
+fairtoy reset \
+  --data-dir data/full \
+  --database data/generated/fairtoy-full.sqlite3
 ```
 
 Both commands validate the complete fixture set before writing. A failed
@@ -109,6 +116,7 @@ GET /api/finishers
 GET /api/toys?finisher_id=FIN-001
 GET /api/toys/{toy_id}?finisher_id=FIN-001
 GET /api/suppliers
+GET /api/suppliers?finisher_id=FIN-001
 PATCH /api/suppliers/{supplier_id}
 ```
 
@@ -139,9 +147,11 @@ Open <http://127.0.0.1:5173>. The Vite development server proxies `/api`
 requests to the FastAPI server at `http://127.0.0.1:8000`. The frontend
 currently provides a Finisher selector, compact Toy impact list, Toy
 traceability detail, and contextual Supplier flag controls. The agreed
-workflow refinement is a risk-focused Needs Attention view, a complete Toy
-Inventory view, and explicit Finisher context. Authentication,
-administration, and generic CRUD remain out of scope.
+workflow is one Toys workspace with an `All statuses` filter by default,
+individual impact-status filters, search, and ten-row client-side pagination,
+plus a global Supplier Review workspace that can be opened before selecting a
+Finisher. A selected Finisher can optionally provide relevance context.
+Authentication, administration, and generic CRUD remain out of scope.
 
 Frontend checks:
 

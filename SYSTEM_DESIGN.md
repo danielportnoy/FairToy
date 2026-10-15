@@ -48,9 +48,10 @@ React + TypeScript UI
 
 ### Source fixtures and importer
 
-The CSVs under `data/` are treated as external customer-export-style input.
-An explicit importer validates relationships and maps source rows into the
-canonical model described in [`SPEC.md`](SPEC.md).
+The CSVs under the selected `data/demo/` or `data/full/` fixture directory
+are treated as external customer-export-style input. An explicit importer
+validates relationships and maps source rows into the canonical model
+described in [`SPEC.md`](SPEC.md).
 
 The importer should be deterministic and idempotent. It should preserve
 distinct relationships, retain nulls for blank optional values, and fail with
@@ -68,10 +69,11 @@ SQLAlchemy models and constraints will define a file-backed SQLite database.
 SQLite is the source of truth for the local application and stores canonical
 entities plus the mutable current Supplier flag.
 
-A dedicated setup/import command will create the schema and load `data/`.
-Normal application startup will reuse the existing database and will not
-reseed it, so runtime Supplier flags survive restarts. A separate development
-reset operation may intentionally recreate the database from the fixtures.
+A dedicated setup/import command will create the schema and load the selected
+fixture directory, defaulting to `data/demo/`. Normal application startup
+will reuse the existing database and will not reseed it, so runtime Supplier
+flags survive restarts. A separate development reset operation may
+intentionally recreate the database from either fixture set.
 
 Generated database files do not belong in version control. A migration system
 is deferred for this disposable take-home database.
@@ -212,12 +214,20 @@ supplied as a filter, conceptually:
 - `GET /api/toys?finisher_id={finisher_id}`
 - `GET /api/toys/{toy_id}?finisher_id={finisher_id}`
 - `GET /api/suppliers`
+- `GET /api/suppliers?finisher_id={finisher_id}`
 - `PATCH /api/suppliers/{supplier_id}`
 
 The current Supplier risk state is updated with an explicit desired value,
 conceptually `PATCH /suppliers/{supplier_id}` with
 `child_labor_flagged: true|false`. The backend owns the related
 `flagged_at` update; the UI does not toggle based on stale local state.
+
+The unfiltered Supplier collection is the primary Supplier Review read and
+returns all Suppliers with current flag state and `flagged_at`. When
+`finisher_id` is supplied, it returns one row per unique Supplier reachable
+through that Finisher's Toy/Part/source graph, with a related-Toy count where
+practical. The filtered form provides contextual relevance; it does not
+restrict the global Supplier flag mutation.
 
 List reads should return compact Toy impact summaries. A detail read for one
 Toy should return its complete parts, quantities, possible sources, Supplier
@@ -232,27 +242,36 @@ reason codes alongside human-readable reasons. Serialize monetary values
 consistently, with decimal strings acceptable when preserving currency
 precision.
 
-React presents one focused Finisher workflow across three views:
+React presents one focused Finisher workflow across two top-level workspaces:
 
-- **Needs Attention:** the default view for the selected Finisher, with
-  compact risk counts and a prioritized queue of affected and potentially
-  affected Toys;
-- **Inventory:** the complete Toy catalog with search, status filtering, and
-  links to investigation;
-- **Toy Investigation:** the selected Toy's Parts and possible source paths,
-  with contextual Supplier flag actions.
+- **Toys:** one searchable catalog with an `All statuses` filter by default.
+  Individual impact-status filters can narrow the same list. The list
+  supports client-side pagination of ten rows per page;
+- **Suppliers:** a global list of unique Suppliers with current flag state,
+  search/filter controls, and flag/unflag actions. The selected Finisher is
+  optional context for showing Supplier relevance.
 
-The first visit requires explicit Finisher selection because authentication
-and user accounts are out of scope. The selected Finisher remains visible
-across views. The UI uses progressive disclosure: summaries and risk signals
-come first, while Parts and source paths are opened on demand.
+**Toy Investigation** is a drill-down view opened from the Toys list. It
+shows the selected Toy's Parts and possible source paths, with contextual
+Supplier flag actions. The UI must not render the entire relationship graph
+as one equally weighted page.
 
-The current MVP reuses the existing compact summary and on-demand detail
+The first Toys/catalog visit requires explicit Finisher selection because
+authentication and user accounts are out of scope. Supplier Review can be
+opened without a selected Finisher. When present, the selected Finisher
+remains visible across the Finisher-scoped views. The UI uses progressive
+disclosure: summaries and risk signals come first, while Parts and source
+paths are opened on demand.
+
+The current MVP reuses the existing compact Toy summary and on-demand detail
 endpoints. It may derive simple status counts from the loaded summary list;
-it does not add a separate overview endpoint, exposure projection, or
-server-side path pagination for the take-home. It must still represent
-loading, empty, error, and mutation states. Full administration navigation is
-deferred.
+it does not add a separate Toy overview endpoint, exposure projection, or
+server-side pagination for the take-home. The browser paginates the loaded
+summary list in ten-row pages. Supplier Review uses the global Supplier
+collection by default and may use the focused `finisher_id` query only for
+relevance context, rather than fetching every Toy detail in the browser. The
+UI must still represent loading, empty, error, and mutation states. Full
+administration navigation is deferred.
 
 Frontend API calls will be centralized behind a small typed client using the
 browser's native `fetch`. After a Supplier mutation, the dashboard will
@@ -294,10 +313,11 @@ end-to-end workflow. A full browser automation suite is deferred.
 4. What tests verify importer integrity, impact classification, and the
    end-to-end flag flow?
 
-The frontend information architecture is resolved by D036; exact route
-mechanics remain an implementation detail. The MVP scale boundary is resolved
-by D038; a future projection or server-side pagination strategy should be
-introduced only when observed fan-out, payload size, or latency justifies it.
+The frontend information architecture is resolved by D036, D042, and D043;
+exact route mechanics remain an implementation detail. The MVP scale boundary
+is resolved by D038 and D043; a future projection or server-side pagination
+strategy should be introduced only when observed fan-out, payload size, or
+latency justifies it.
 
 ## Deferred production extensions
 

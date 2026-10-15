@@ -9,7 +9,7 @@ from fairtoy.api import create_app
 from fairtoy.db import create_engine_for_path, create_schema, create_session_factory
 from fairtoy.importer import import_fixtures
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data"
+FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
 
 
 @pytest.fixture(scope="module")
@@ -41,6 +41,33 @@ def test_lists_finishers_and_suppliers(client: TestClient) -> None:
     assert suppliers
     assert suppliers[0]["child_labor_flagged"] is False
     assert suppliers[0]["flagged_at"] is None
+
+
+def test_lists_suppliers_relevant_to_selected_finisher(
+    client: TestClient,
+) -> None:
+    response = client.get(
+        "/api/suppliers",
+        params={"finisher_id": "FIN-003"},
+    )
+
+    assert response.status_code == 200
+    suppliers = response.json()
+    assert suppliers
+    assert [supplier["supplier_id"] for supplier in suppliers] == sorted(
+        supplier["supplier_id"] for supplier in suppliers
+    )
+    assert all(supplier["related_toy_count"] > 0 for supplier in suppliers)
+
+
+def test_supplier_review_rejects_unknown_finisher(client: TestClient) -> None:
+    response = client.get(
+        "/api/suppliers",
+        params={"finisher_id": "FIN-UNKNOWN"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Finisher not found"
 
 
 def test_lists_finisher_toy_summaries_with_derived_impact(

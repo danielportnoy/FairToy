@@ -4,8 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
-DEFAULT_DATABASE_PATH = DEFAULT_DATA_DIR / "generated" / "fairtoy.sqlite3"
+DATA_ROOT = PROJECT_ROOT / "data"
+DEFAULT_DATA_DIR = DATA_ROOT / "demo"
+DEFAULT_DATABASE_PATH = DATA_ROOT / "generated" / "fairtoy.sqlite3"
 
 
 @dataclass(frozen=True)
