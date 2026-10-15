@@ -211,6 +211,22 @@ full conversation.
   Compilation and diff-whitespace checks also passed. The test environment
   still reports 11 third-party Python 3.14 deprecation warnings.
 
+## 2026-10-15 — Importer boundaries / Slice 7
+
+- **Phase:** Foundation maintainability
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** split importer contracts, CSV parsing, source normalization and
+  reference validation, and database persistence into focused modules.
+- **Compatibility:** `fairtoy.importer.read_source_data` and
+  `fairtoy.importer.import_fixtures` remain the public entry points, with
+  existing record and summary imports re-exported through the façade.
+- **Behavior:** preserve deterministic ordering, duplicate handling, actionable
+  validation errors, atomic persistence, and Supplier-flag preservation.
+- **Verification:** importer tests passed (`5 passed`); full suite passed
+  (`36 passed`). Ruff, format, mypy, compilation, and diff checks passed.
+- **Explicit deferral:** schema changes, API behavior, and new importer
+  capabilities remain out of scope.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
