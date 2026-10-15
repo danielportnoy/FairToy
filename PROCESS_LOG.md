@@ -21,6 +21,55 @@ full conversation.
 - **Review outcome:** domain decisions were accepted by the candidate; API and
   physical implementation details remain intentionally deferred.
 
+## 2026-10-14 — System design started
+
+- **Phase:** System design
+- **Status:** In progress
+- **Artifact:** [`SYSTEM_DESIGN.md`](SYSTEM_DESIGN.md)
+- **Boundary:** technical choices may now be made, but only against the
+  approved product specification.
+- **First design focus:** canonical relational schema and reproducible
+  database initialization.
+- **Decision accepted:** use SQLAlchemy with file-backed SQLite; separate
+  setup/import from normal application startup so Supplier flags persist.
+- **Decision accepted:** use a normalized relational model with explicit
+  Finisher/Toy and Part/source relationship tables instead of mirroring the
+  flat CSVs.
+- **Decision accepted:** use supplied source identifiers as canonical keys for
+  this assignment, with composite keys for relationship tables.
+- **Decision accepted:** require graph identity and relationship fields while
+  preserving missing optional and enrichment values as null.
+- **Decision accepted:** protect referenced traceability relationships with
+  foreign keys and restricted deletes.
+- **Decision accepted:** validate and import source data atomically, while
+  keeping normal seeding separate from runtime Supplier state.
+- **Decision accepted:** retrieve filtered traceability facts from the
+  database and classify impact in a testable backend domain service.
+- **Decision accepted:** shape the API around the Finisher traceability
+  workflow rather than generic CRUD resources.
+- **Decision accepted:** update Supplier child-labor state with an explicit
+  desired value rather than a toggle operation.
+- **Decision accepted:** separate compact dashboard summaries from
+  on-demand full Toy traceability details.
+- **Decision accepted:** use one focused Finisher dashboard rather than
+  unrelated administration screens.
+- **Decision accepted:** focus automated tests on the domain, importer, and
+  API boundaries, with a frontend build and manual workflow check.
+- **Decision accepted:** rely on automatic primary/unique-key indexes and add
+  only supplemental reverse-relationship indexes.
+- **Decision accepted:** use synchronous request-scoped SQLAlchemy sessions
+  with explicit transactions for Supplier flag mutations.
+- **Decision accepted:** avoid generic internal IDs and lifecycle timestamps
+  until the product needs their semantics.
+- **Decision accepted:** keep Factory as the PartSource site node and derive
+  Supplier through Factory while retaining direct Supplier flag state.
+- **Decision accepted:** scope Toy summary and detail reads under the
+  selected Finisher while keeping Supplier updates global.
+- **Decision accepted:** expose Toys as a reusable top-level resource and use
+  the selected Finisher as the dashboard filter.
+- **Decision accepted:** use a small typed frontend API client over native
+  `fetch` and keep server data authoritative.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

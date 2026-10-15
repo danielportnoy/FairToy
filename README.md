@@ -34,6 +34,8 @@ production deployment are intentionally deferred.
 
 - [`SPEC.md`](SPEC.md) — product boundary, domain rules, assumptions, and
   acceptance criteria
+- [`SYSTEM_DESIGN.md`](SYSTEM_DESIGN.md) — technical architecture and
+  implementation design
 - [`DECISIONS.md`](DECISIONS.md) — decisions and deferred extensions
 - [`PROCESS_LOG.md`](PROCESS_LOG.md) — implementation phases, AI usage, and
   review checkpoints

@@ -86,8 +86,9 @@ not an independently flaggable risk subject.
 
 ### PartSource
 
-A possible or approved source for a Part, connecting it to a Supplier and
-Factory and carrying source-specific values such as unit cost.
+A possible or approved source for a Part, connecting it to a Factory and
+carrying source-specific values such as unit cost. The Supplier is derived
+through the Factory's Supplier relationship.
 
 The supplied BOM does not identify which source produced a particular
 instance. Therefore, a PartSource is not treated as proof that every toy
