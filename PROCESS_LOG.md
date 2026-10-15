@@ -88,6 +88,29 @@ full conversation.
 - **Review gate:** do not begin the next implementation slice until this
   foundation is reviewed and accepted.
 
+## 2026-10-15 — Core behavior / Slice 2
+
+- **Phase:** Core behavior
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** refactor the pure impact-analysis service into focused contracts,
+  validation, classification, and calculation modules while preserving its
+  public `fairtoy.impact` imports.
+- **Domain behavior:** classify Parts as unaffected, potentially affected, or
+  affected from current possible-source flags; classify Toys using affected
+  over potentially affected precedence; preserve global Toy-level semantics
+  independent of Finisher context.
+- **Input handling:** deduplicate identical source facts, order results
+  deterministically, and reject contradictory names, Supplier flags, source
+  relationships, quantities, or mixed source/no-source facts.
+- **Verification:** 14 automated tests passed, including the full Slice 1
+  importer suite and Slice 2 status, precedence, unflagging, ordering, and
+  invalid-input coverage.
+- **Readability outcome:** the public facade remains small; input contracts,
+  consistency validation, status rules, and orchestration are now separately
+  reviewable. No API, repository, or frontend behavior was introduced.
+- **Review gate:** do not begin repository/API integration until this service
+  is reviewed and accepted.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
