@@ -43,6 +43,21 @@ class TraceabilityFact:
 
 
 @dataclass(frozen=True)
+class ToyTraceability:
+    """Finisher-scoped Toy context plus its possible source facts.
+
+    ``facts`` may be empty when the canonical Toy has no BOM rows. The
+    Finisher context is retained here for catalog filtering, while impact
+    classification remains global at the Toy level.
+    """
+
+    finisher_id: str
+    toy_id: str
+    toy_name: str
+    facts: tuple[TraceabilityFact, ...]
+
+
+@dataclass(frozen=True)
 class ImpactPath:
     """An explainable Toy → Part → Supplier → Factory path."""
 
@@ -86,6 +101,7 @@ __all__ = [
     "ImpactPath",
     "ImpactStatus",
     "PartImpact",
+    "ToyTraceability",
     "ToyImpact",
     "TraceabilityFact",
 ]

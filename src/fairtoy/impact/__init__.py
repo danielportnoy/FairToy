@@ -7,6 +7,7 @@ from .contracts import (
     ImpactPath,
     ImpactStatus,
     PartImpact,
+    ToyTraceability,
     ToyImpact,
     TraceabilityFact,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "ImpactPath",
     "ImpactStatus",
     "PartImpact",
+    "ToyTraceability",
     "ToyImpact",
     "TraceabilityFact",
     "calculate_impact",

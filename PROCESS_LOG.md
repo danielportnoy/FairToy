@@ -111,6 +111,23 @@ full conversation.
 - **Review gate:** do not begin repository/API integration until this service
   is reviewed and accepted.
 
+## 2026-10-15 — Repository boundary / Slice 3
+
+- **Phase:** Core behavior
+- **Status:** Implemented; pending human review and acceptance
+- **Scope:** add a synchronous `TraceabilityRepository` that maps the
+  canonical SQLAlchemy graph to Finisher-scoped `ToyTraceability` contracts.
+- **Query behavior:** preserve Toys with no BOM rows, preserve Parts with no
+  possible sources through left joins, derive Supplier through Factory, filter
+  detail reads by Finisher/Toy membership, and order results deterministically.
+- **Domain contract:** retain Finisher catalog context while keeping the
+  impact facts and Supplier state global at the canonical Toy level.
+- **Verification:** 21 automated tests passed, including the importer and
+  impact suites plus repository filtering, source mapping, empty-Toy,
+  no-source-Part, and cross-Finisher coverage.
+- **Review gate:** do not begin API or frontend integration until this
+  repository boundary is reviewed and accepted.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
