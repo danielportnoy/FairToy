@@ -14,11 +14,39 @@ full conversation.
   Suppliers. Toy and Supplier details are drill-downs within those pages.
 - `data/full/` is the default fixture set for the single local SQLite
   database; `data/demo/` remains available for focused UI work and tests.
-- The latest verified Python suite has 52 passing tests; frontend checks are
+- The implemented operational boundary includes structured application logs,
+  safe request correlation, and import/mutation lifecycle events. Metrics,
+  tracing platforms, health endpoints, and deployment monitoring remain
+  deferred.
+- The latest verified Python suite has 55 passing tests; frontend checks are
   recorded in the implementation entries below.
 
 The dated entries that follow are historical checkpoints, not an additional
 source of requirements.
+
+## Process summary
+
+The work followed five deliberate phases:
+
+1. **Frame the domain:** identify the Finisher outcome, separate required
+   traceability from industry context, and write the first product contract.
+2. **Resolve ambiguity:** record assumptions about repeated CSV identifiers,
+   possible versus actual sources, global Supplier risk, impact certainty, and
+   missing evidence.
+3. **Design the system:** choose the normalized relational model, importer
+   boundary, pure impact service, workflow APIs, and progressive-disclosure
+   UI.
+4. **Implement in slices:** build and review ingestion, impact rules,
+   repository/API boundaries, Supplier mutation, and the two frontend
+   workspaces; revise the spec when product decisions changed.
+5. **Verify and refine:** test each boundary, run type/build/lint checks,
+   exercise the demo workflow, and add a bounded observability foundation
+   without expanding into production infrastructure.
+
+The human-owned decisions are captured in `SPEC.md` and `DECISIONS.md`.
+AI was used as an implementation and review accelerator; it did not replace
+the product choices, scope decisions, or responsibility to understand the
+resulting code.
 
 ## 2026-10-14 — Domain framing
 
@@ -761,7 +789,7 @@ source of requirements.
 ## 2026-10-16 — Add observability foundations
 
 - **Phase:** Verification / operational readiness
-- **Status:** Implemented; pending human review
+- **Status:** Implemented and verified
 - **Scope:** add standard-library structured key-value logging, safe request
   correlation IDs, API request/mutation events, and importer lifecycle events
   with duration and record-count context.
@@ -786,7 +814,7 @@ source of requirements.
 
 AI is an implementation accelerator, not the product decision-maker.
 
-## Planned phases
+## Original planned phases
 
 1. **System design:** choose the physical schema, importer boundary, query
    strategy, API contract, and frontend shape.

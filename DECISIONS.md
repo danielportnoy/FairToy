@@ -3,6 +3,40 @@
 This log records deliberate choices and important deferred extensions. It is
 not a transcript of the planning conversation.
 
+## Current decision summary
+
+These are the decisions that define the implemented MVP. The detailed records
+below preserve alternatives, trade-offs, and superseded iterations.
+
+- **Product boundary (D001, D012):** prioritize Finisher traceability and
+  Supplier risk review; defer generic CRUD, recalls, orders, authentication,
+  and other industry actors.
+- **Canonical model (D003–D006, D017, D031):** normalize the flat exports into
+  explicit Finisher/Toy, Toy/Part, and Part/Factory/Supplier relationships;
+  treat sources as possible paths, with Supplier derived through Factory.
+- **Impact semantics (D007, D010, D041):** derive three statuses from current
+  Supplier flags; keep missing-evidence and exposure metrics as future
+  product decisions.
+- **Risk state (D008, D009, D024, D040, D045):** Supplier flags are global,
+  mutations use explicit desired state, and the UI confirms and refreshes
+  after a global change.
+- **Persistence and ingestion (D013, D016, D018–D021):** use validated,
+  atomic, idempotent imports into a normalized SQLite database; reset is
+  explicit and source identifiers are canonical for this assignment.
+- **Backend boundaries (D022, D023, D025, D029):** repositories retrieve
+  facts, a pure domain service classifies them, and workflow-oriented APIs
+  separate compact summaries from detail reads.
+- **Frontend workflow (D033, D034, D036, D037, D044):** use two focused
+  progressive-disclosure workspaces, explicit Finisher context, a single
+  filterable Toys list, and a small typed client.
+- **Scale boundary (D027, D028, D038):** verify the core boundaries strongly,
+  use compact reads and client-side pagination for the take-home, and defer
+  projections, server-side pagination, and production storage until measured
+  need exists.
+- **Explanation and operations (D035, D039, D046):** preserve stable reason
+  codes, human-readable explanations, safe structured logs, and request
+  correlation without adding a metrics or tracing platform.
+
 ## D001 — Optimize for traceability, not generic CRUD
 
 - **Status:** Accepted
@@ -531,3 +565,18 @@ not a transcript of the planning conversation.
 - **Trade-off:** Flagging an unrelated Supplier has no current Toy impact for
   the active Finisher. The UI must explain that the mutation is global and
   may affect other Finishers or future relationships.
+
+## D046 — Add bounded application observability
+
+- **Status:** Accepted
+- **Decision:** Add structured key-value application logs, safe request
+  correlation through `X-Request-ID`, and lifecycle events for API requests,
+  Supplier mutations, and fixture imports. Do not add metrics, distributed
+  tracing, health endpoints, dashboards, or alerting.
+- **Rationale:** Request correlation and safe lifecycle context improve local
+  debugging and make the application boundary easier to operate without
+  introducing a production observability platform that the assignment does not
+  require.
+- **Trade-off:** The logs are useful diagnostic foundations, not a complete
+  operational system. Production would connect them to centralized logging,
+  metrics, tracing, and service-level objectives.
