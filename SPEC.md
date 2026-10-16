@@ -5,6 +5,9 @@
 This document is the product and domain contract. It defines the user outcome,
 scope, domain semantics, assumptions, and acceptance criteria.
 
+It describes what the product must do and why, while leaving implementation
+structure and infrastructure choices to the system design.
+
 - [`SYSTEM_DESIGN.md`](SYSTEM_DESIGN.md) explains how the contract is
   implemented.
 - [`DECISIONS.md`](DECISIONS.md) records alternatives and trade-offs.

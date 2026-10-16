@@ -818,6 +818,18 @@ resulting code.
   `git diff --check` passed. The test fixture root and CLI default paths were
   updated for the new backend location.
 
+## 2026-10-16 — Reframe design documentation for interview review
+
+- **Phase:** Documentation / interview preparation
+- **Status:** Implemented
+- **Scope:** reorganize `SYSTEM_DESIGN.md` around requirements, non-functional
+  goals, known scale, data model, API design, architecture, main flows, deep
+  dives, and production evolution. Clarify in `SPEC.md` that it owns product
+  behavior while the system design owns implementation choices.
+- **Reason:** make the spec-driven process legible to a reviewer unfamiliar
+  with the repository without duplicating the decision log.
+- **Verification:** documentation diff reviewed and `git diff --check` passed.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
