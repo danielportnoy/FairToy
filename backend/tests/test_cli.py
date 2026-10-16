@@ -7,7 +7,7 @@ from fairtoy.config import DEFAULT_DATA_DIR, ImportSettings
 from fairtoy.db import create_engine_for_path, create_session_factory
 from fairtoy.models import Supplier
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
+FIXTURE_DIR = Path(__file__).parents[2] / "data" / "full"
 
 
 def test_default_import_settings_use_full_fixture_set() -> None:

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { Supplier, ToySummary } from "./api";
+import type { Supplier, ToySummary } from "../src/api";
 import {
   filterAndSortToys,
   mergeSupplierRelevance,
   paginate,
-} from "./view-model";
+} from "../src/view-model";
 
 const toys: ToySummary[] = [
   {

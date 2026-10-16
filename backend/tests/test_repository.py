@@ -9,7 +9,7 @@ from fairtoy.importer import import_fixtures
 from fairtoy.models import FinisherToy, Part, Toy, ToyPart
 from fairtoy.repository import TraceabilityRepository
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
+FIXTURE_DIR = Path(__file__).parents[2] / "data" / "full"
 
 
 @pytest.fixture(scope="module")

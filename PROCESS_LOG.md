@@ -804,6 +804,20 @@ resulting code.
   passed. The environment still reports 13 third-party Python 3.14
   deprecation warnings.
 
+## 2026-10-16 — Clarify repository boundaries
+
+- **Phase:** Verification / repository presentation
+- **Status:** Implemented and verified
+- **Scope:** group the Python package and backend tests under `backend/`, and
+  move frontend tests under `frontend/tests/`. Keep the existing API, domain
+  model, UI behavior, and fixture layout unchanged.
+- **Reason:** make the two application surfaces and their test ownership
+  immediately clear to a reviewer without introducing new runtime abstractions.
+- **Verification:** backend tests (`55 passed`), Ruff lint/format, mypy,
+  frontend tests (`17 passed`), TypeScript typecheck, production build, and
+  `git diff --check` passed. The test fixture root and CLI default paths were
+  updated for the new backend location.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.

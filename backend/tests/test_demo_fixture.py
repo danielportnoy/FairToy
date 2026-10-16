@@ -12,7 +12,7 @@ from fairtoy.impact import (
 from fairtoy.importer import import_fixtures
 from fairtoy.repository import TraceabilityRepository
 
-DEMO_FIXTURE_DIR = Path(__file__).parents[1] / "data" / "demo"
+DEMO_FIXTURE_DIR = Path(__file__).parents[2] / "data" / "demo"
 
 
 def test_demo_fixture_is_small_and_keeps_supplier_scope_finisher_specific(

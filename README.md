@@ -184,9 +184,9 @@ Run the backend test suite and quality checks from the repository root:
 
 ```bash
 pytest -q
-ruff check src tests
-ruff format --check src tests
-mypy src/fairtoy
+ruff check backend/src backend/tests
+ruff format --check backend/src backend/tests
+mypy backend/src/fairtoy
 ```
 
 Run the frontend tests, type check, and production build:
@@ -201,10 +201,11 @@ npm run build
 ## Repository structure
 
 ```text
-src/fairtoy/              FastAPI application and domain code
+backend/src/fairtoy/      FastAPI application and domain code
   impact/                 Pure impact classification service
-tests/                    Backend, importer, API, and observability tests
+backend/tests/            Backend, importer, API, and observability tests
 frontend/src/             React UI, typed API client, and view models
+frontend/tests/           Frontend unit and component tests
 data/full/                Complete source CSV fixtures
 data/demo/                Small review/demo CSV fixtures
 data/generated/           Ignored local SQLite databases

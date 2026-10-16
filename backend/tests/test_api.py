@@ -9,7 +9,7 @@ from fairtoy.api import create_app
 from fairtoy.db import create_engine_for_path, create_schema, create_session_factory
 from fairtoy.importer import import_fixtures
 
-FIXTURE_DIR = Path(__file__).parents[1] / "data" / "full"
+FIXTURE_DIR = Path(__file__).parents[2] / "data" / "full"
 
 
 @pytest.fixture(scope="module")
