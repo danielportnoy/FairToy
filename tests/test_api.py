@@ -43,6 +43,16 @@ def test_lists_finishers_and_suppliers(client: TestClient) -> None:
     assert suppliers[0]["flagged_at"] is None
 
 
+def test_request_id_is_returned_and_reused(client: TestClient) -> None:
+    response = client.get(
+        "/api/finishers",
+        headers={"X-Request-ID": "interview-request-1"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["X-Request-ID"] == "interview-request-1"
+
+
 def test_lists_suppliers_relevant_to_selected_finisher(
     client: TestClient,
 ) -> None:

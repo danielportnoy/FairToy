@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import sys
 from pathlib import Path
+from time import perf_counter
 
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -19,6 +21,9 @@ from .importer import (
     import_source_data,
     read_source_data,
 )
+from .observability import configure_logging, get_logger, log_event
+
+logger = get_logger(__name__)
 
 
 def _add_location_arguments(parser: argparse.ArgumentParser) -> None:
@@ -80,20 +85,62 @@ def _run_import(
     settings: ImportSettings,
     reset: bool,
 ) -> ImportSummary:
-    source_data = read_source_data(settings.data_dir)
-    engine = create_engine_for_path(settings.database_path)
+    operation = "reset" if reset else "setup"
+    started = perf_counter()
+    log_event(
+        logger,
+        "import_started",
+        operation=operation,
+        data_dir=settings.data_dir,
+        database_path=settings.database_path,
+    )
     try:
-        if reset:
-            drop_schema(engine)
-        create_schema(engine)
-        session_factory = create_session_factory(engine)
-        with session_factory() as session:
-            return import_source_data(session, source_data)
-    finally:
-        engine.dispose()
+        source_data = read_source_data(settings.data_dir)
+        engine = create_engine_for_path(settings.database_path)
+        try:
+            if reset:
+                drop_schema(engine)
+            create_schema(engine)
+            session_factory = create_session_factory(engine)
+            with session_factory() as session:
+                summary = import_source_data(session, source_data)
+        finally:
+            engine.dispose()
+    except Exception as exc:
+        log_event(
+            logger,
+            "import_failed",
+            level=logging.ERROR,
+            operation=operation,
+            duration_ms=round((perf_counter() - started) * 1000, 2),
+            error_type=type(exc).__name__,
+        )
+        raise
+
+    log_event(
+        logger,
+        "import_completed",
+        operation=operation,
+        duration_ms=round((perf_counter() - started) * 1000, 2),
+        **{
+            field: getattr(summary, field)
+            for field in (
+                "finishers",
+                "suppliers",
+                "factories",
+                "toys",
+                "finisher_toys",
+                "parts",
+                "toy_parts",
+                "part_sources",
+            )
+        },
+    )
+    return summary
 
 
 def main(argv: list[str] | None = None) -> int:
+    configure_logging()
     parser = _build_parser()
     args = parser.parse_args(argv)
     try:

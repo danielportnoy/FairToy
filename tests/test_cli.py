@@ -30,6 +30,22 @@ def _run_setup(database_path: Path) -> None:
     )
 
 
+def test_setup_logs_import_lifecycle(tmp_path: Path, caplog) -> None:
+    database_path = tmp_path / "fairtoy.sqlite3"
+
+    with caplog.at_level("INFO", logger="fairtoy.cli"):
+        _run_setup(database_path)
+
+    messages = [
+        record.getMessage() for record in caplog.records if record.name == "fairtoy.cli"
+    ]
+    assert any("event=import_started" in message for message in messages)
+    assert any(
+        "event=import_completed" in message and "toys=300" in message
+        for message in messages
+    )
+
+
 def _set_supplier_flag(database_path: Path) -> None:
     engine = create_engine_for_path(database_path)
     try:

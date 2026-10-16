@@ -137,6 +137,19 @@ The PATCH body is an explicit desired state:
 {"child_labor_flagged": true}
 ```
 
+## Observability boundary
+
+The API and setup CLI emit structured key-value application logs using
+Python's standard logging library. API responses include an `X-Request-ID`
+header, reusing a safe caller-provided value or generating one when absent.
+Supplier flag mutations log their effective state, while setup and reset log
+import duration, outcome, and record counts. Set `FAIRTOY_LOG_LEVEL=DEBUG` to
+increase application log detail locally.
+
+Metrics exporters, distributed tracing, health/readiness endpoints,
+dashboards, alerting, and deployment monitoring are intentionally deferred
+until the production runtime and service-level objectives are defined.
+
 ## Frontend
 
 The frontend is a separate Vite + React + TypeScript app. Start the API first,

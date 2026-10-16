@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Generator
+import logging
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
+from time import perf_counter
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -31,11 +33,22 @@ from .impact import (
     calculate_toy_impact,
     calculate_toy_impacts,
 )
+from .observability import (
+    REQUEST_ID_HEADER,
+    configure_logging,
+    get_logger,
+    log_event,
+    request_id_from_header,
+    reset_request_id,
+    set_request_id,
+)
 from .repository import (
     SupplierDetailSummary,
     SupplierSummary,
     TraceabilityRepository,
 )
+
+logger = get_logger(__name__)
 
 
 def create_app(
@@ -43,6 +56,7 @@ def create_app(
 ) -> FastAPI:
     """Create the FairToy API with a request-scoped SQLite session factory."""
 
+    configure_logging()
     engine = create_engine_for_path(database_path)
     session_factory = create_session_factory(engine)
 
@@ -58,6 +72,41 @@ def create_app(
     )
     app.state.engine = engine
     app.state.session_factory = session_factory
+
+    @app.middleware("http")
+    async def observe_request(
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
+        request_id = request_id_from_header(request.headers.get(REQUEST_ID_HEADER))
+        request_id_token = set_request_id(request_id)
+        started = perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception as exc:
+            log_event(
+                logger,
+                "http_request_failed",
+                level=logging.ERROR,
+                method=request.method,
+                path=request.url.path,
+                duration_ms=round((perf_counter() - started) * 1000, 2),
+                error_type=type(exc).__name__,
+            )
+            raise
+        else:
+            response.headers[REQUEST_ID_HEADER] = request_id
+            log_event(
+                logger,
+                "http_request_completed",
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                duration_ms=round((perf_counter() - started) * 1000, 2),
+            )
+            return response
+        finally:
+            reset_request_id(request_id_token)
 
     @app.get("/api/finishers", response_model=list[FinisherResponse])
     def list_finishers(
@@ -120,13 +169,35 @@ def create_app(
                 )
         except SQLAlchemyError as exc:
             session.rollback()
+            log_event(
+                logger,
+                "supplier_flag_update_failed",
+                level=logging.ERROR,
+                supplier_id=supplier_id,
+                requested_flagged=payload.child_labor_flagged,
+                error_type=type(exc).__name__,
+            )
             raise HTTPException(
                 status_code=500,
                 detail="Supplier flag update failed",
             ) from exc
 
         if supplier is None:
+            log_event(
+                logger,
+                "supplier_flag_update_not_found",
+                level=logging.WARNING,
+                supplier_id=supplier_id,
+                requested_flagged=payload.child_labor_flagged,
+            )
             raise HTTPException(status_code=404, detail="Supplier not found")
+        log_event(
+            logger,
+            "supplier_flag_updated",
+            supplier_id=supplier.supplier_id,
+            child_labor_flagged=supplier.child_labor_flagged,
+            flagged_at=supplier.flagged_at,
+        )
         return _supplier_response(supplier)
 
     @app.get("/api/toys", response_model=list[ToySummaryResponse])

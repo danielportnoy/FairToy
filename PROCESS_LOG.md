@@ -758,6 +758,24 @@ source of requirements.
 - **Verification:** frontend tests (`17 passed`), TypeScript typecheck,
   production build, and `git diff --check` passed.
 
+## 2026-10-16 — Add observability foundations
+
+- **Phase:** Verification / operational readiness
+- **Status:** Implemented; pending human review
+- **Scope:** add standard-library structured key-value logging, safe request
+  correlation IDs, API request/mutation events, and importer lifecycle events
+  with duration and record-count context.
+- **Safety boundary:** do not log request bodies, credentials, full
+  traceability payloads, or per-row repository/impact activity. Metrics,
+  tracing backends, health checks, dashboards, alerting, and deployment
+  monitoring remain deferred until runtime requirements exist.
+- **Verification:** focused observability tests passed (`25 passed` across
+  API, CLI, and logging tests); the full backend suite passed (`55 passed`).
+  Frontend tests passed (`17 passed`), TypeScript typecheck and production
+  build passed, and Ruff lint/format, mypy, compilation, and diff checks
+  passed. The environment still reports 13 third-party Python 3.14
+  deprecation warnings.
+
 ## Working method
 
 1. Human defines or approves the product boundary and business semantics.
